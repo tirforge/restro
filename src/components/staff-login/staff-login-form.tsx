@@ -193,7 +193,7 @@ export function StaffLoginForm({
 
       <div className="flex flex-col items-center gap-4">
         <div className="flex h-4 items-center gap-2.5" aria-label="PIN entered">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: Math.max(4, pin.length) }).map((_, i) => (
             <span
               key={i}
               className={`size-3.5 rounded-full transition-colors ${
@@ -202,6 +202,9 @@ export function StaffLoginForm({
             />
           ))}
         </div>
+        <p className="text-muted-foreground text-xs">
+          Enter your 4–6 digit PIN
+        </p>
         <div className="grid w-full grid-cols-3 gap-3">
           {KEYS.map((key) => (
             <Button

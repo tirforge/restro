@@ -118,7 +118,7 @@ export function WaiterHome({
         </div>
       </div>
 
-      <Button size="lg" className="h-14 w-full text-base" render={<Link href={`/u/${username}/order/new`} />}>
+      <Button size="lg" className="h-14 w-full text-base" nativeButton={false} render={<Link href={`/u/${username}/order/new`} />}>
         <PlusIcon className="size-5" />
         New order
       </Button>

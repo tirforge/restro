@@ -122,7 +122,7 @@ export function OrdersBoard({
             enabled={enabled}
             onToggle={toggle}
           />
-          <Button render={<Link href="/dashboard/pos" />}>New order</Button>
+          <Button nativeButton={false} render={<Link href="/dashboard/pos" />}>New order</Button>
         </div>
       </div>
 

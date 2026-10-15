@@ -129,6 +129,7 @@ export function TableShareDialog({
           <Button
             className="flex-1"
             disabled={!qr}
+            nativeButton={false}
             render={
               <a href={qr ?? undefined} download={`qr-${fileSlug(table.label)}.png`} />
             }
@@ -139,6 +140,7 @@ export function TableShareDialog({
           <Button
             variant="outline"
             disabled={!link}
+            nativeButton={false}
             render={
               <a href={link || undefined} target="_blank" rel="noopener noreferrer" />
             }
