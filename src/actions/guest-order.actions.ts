@@ -13,6 +13,7 @@ import {
 } from "@/lib/validators/guest-order";
 import {
   getGuestOrders,
+  listGuestTables,
   placeGuestOrder,
   resolveGuestOrderTarget,
 } from "@/services/guest-order.service";
@@ -95,4 +96,15 @@ export const guestMyOrdersAction = async (): Promise<
 /** Log the guest out by clearing their session cookie. */
 export const guestLogoutAction = async (): Promise<void> => {
   await destroyGuestSession();
+};
+
+/** Public table list for the guest table picker (no login required). */
+export const guestTablesAction = async (
+  username: string,
+): Promise<ActionResult<readonly { id: string; label: string; seats: number | null }[]>> => {
+  try {
+    return success([...(await listGuestTables(username))]);
+  } catch (error) {
+    return failure(error instanceof Error ? error.message : "Something went wrong");
+  }
 };

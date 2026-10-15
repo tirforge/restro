@@ -6,6 +6,9 @@ import type { OrderDTO } from "@/types/order";
 vi.mock("@/repositories/restaurant.repository", () => ({
   findRestaurantByUsername: vi.fn(),
 }));
+vi.mock("@/repositories/table.repository", () => ({
+  findTablesByRestaurant: vi.fn(),
+}));
 vi.mock("@/repositories/order.repository", () => ({
   findOrdersForGuest: vi.fn(),
 }));
@@ -25,6 +28,7 @@ vi.mock("@/services/order.service", () => ({
 import type { OrderWithRelations } from "@/repositories/order.repository";
 import { findOrdersForGuest } from "@/repositories/order.repository";
 import { findRestaurantByUsername } from "@/repositories/restaurant.repository";
+import { findTablesByRestaurant } from "@/repositories/table.repository";
 import { getMenu } from "@/services/menu-item.service";
 import {
   addItems,
@@ -38,6 +42,7 @@ import {
   GUEST_ORDER_RESTAURANT_NOT_FOUND,
   GUEST_ORDER_TABLE_INVALID,
   getGuestOrders,
+  listGuestTables,
   loadGuestOrderPage,
   placeGuestOrder,
   resolveGuestOrderTarget,
@@ -148,6 +153,49 @@ describe("placeGuestOrder", () => {
       "o9",
     );
     expect(createOrder).not.toHaveBeenCalled();
+  });
+
+  it("passes the guest name through to the order", async () => {
+    vi.mocked(listOrders).mockResolvedValue([]);
+    vi.mocked(createOrder).mockResolvedValue({ id: "o1" } as OrderDTO);
+
+    await placeGuestOrder(actor, {
+      username: "elitale",
+      tableId: "t1",
+      idempotencyKey: "abcd1234",
+      customerName: "Asha",
+      items: ITEMS,
+    });
+
+    expect(createOrder).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ customerName: "Asha" }),
+    );
+  });
+});
+
+describe("listGuestTables", () => {
+  it("returns active tables for an order-enabled restaurant", async () => {
+    vi.mocked(findRestaurantByUsername).mockResolvedValue(makeRestaurant());
+    vi.mocked(findTablesByRestaurant).mockResolvedValue([
+      { id: "t1", label: "T1", seats: 4 },
+      { id: "t2", label: "T2", seats: null },
+    ] as never);
+
+    await expect(listGuestTables("elitale")).resolves.toEqual([
+      { id: "t1", label: "T1", seats: 4 },
+      { id: "t2", label: "T2", seats: null },
+    ]);
+  });
+
+  it("returns [] when self-ordering is disabled or the restaurant is missing", async () => {
+    vi.mocked(findRestaurantByUsername).mockResolvedValue(
+      makeRestaurant({ selfOrderEnabled: false }),
+    );
+    await expect(listGuestTables("elitale")).resolves.toEqual([]);
+    vi.mocked(findRestaurantByUsername).mockResolvedValue(null);
+    await expect(listGuestTables("nope")).resolves.toEqual([]);
+    expect(findTablesByRestaurant).not.toHaveBeenCalled();
   });
 });
 

@@ -31,6 +31,7 @@ export const guestPlaceOrderSchema = z.object({
   username: usernameSchema,
   tableId: idSchema,
   idempotencyKey: z.string().trim().min(8).max(100),
+  customerName: z.string().trim().min(1).max(80).optional(),
   note: z.string().trim().max(300).optional(),
   items: z.array(cartLineSchema).min(1, "Add at least one item"),
 });

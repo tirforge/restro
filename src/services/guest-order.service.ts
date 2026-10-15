@@ -5,6 +5,7 @@ import {
   type OrderWithRelations,
 } from "@/repositories/order.repository";
 import { findRestaurantByUsername } from "@/repositories/restaurant.repository";
+import { findTablesByRestaurant } from "@/repositories/table.repository";
 import { computeBill } from "@/services/billing";
 import { getMenu } from "@/services/menu-item.service";
 import {
@@ -89,6 +90,7 @@ export const placeGuestOrder = async (
     orderType: "DINE_IN",
     tableId: actor.tableId,
     idempotencyKey: input.idempotencyKey,
+    customerName: input.customerName,
     customerPhone: actor.phone,
     note: input.note,
     items: input.items,
@@ -149,6 +151,33 @@ export const loadGuestOrderPage = async (
       menu,
     },
   };
+};
+
+export interface GuestTableOption {
+  readonly id: string;
+  readonly label: string;
+  readonly seats: number | null;
+}
+
+/**
+ * Active tables a guest can pick from when they arrive without a table QR
+ * (or want to switch). Returns an empty list when the restaurant is missing,
+ * inactive, or has self-ordering disabled.
+ */
+export const listGuestTables = async (
+  username: string,
+): Promise<readonly GuestTableOption[]> => {
+  const restaurant = await findRestaurantByUsername(username);
+  if (
+    !restaurant ||
+    restaurant.deletedAt ||
+    !restaurant.isActive ||
+    !restaurant.selfOrderEnabled
+  ) {
+    return [];
+  }
+  const tables = await findTablesByRestaurant(restaurant.id);
+  return tables.map((t) => ({ id: t.id, label: t.label, seats: t.seats }));
 };
 
 const GUEST_ORDER_LIMIT = 15;

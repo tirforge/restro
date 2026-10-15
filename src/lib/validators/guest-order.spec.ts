@@ -93,4 +93,27 @@ describe("guestPlaceOrderSchema", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("accepts an optional customer name", () => {
+    const parsed = guestPlaceOrderSchema.parse({
+      username: "elitale",
+      tableId: "t1",
+      idempotencyKey: "abcd1234",
+      customerName: "Asha",
+      items: [{ menuItemId: "i1", quantity: 1 }],
+    });
+    expect(parsed.customerName).toBe("Asha");
+  });
+
+  it("rejects an overlong customer name", () => {
+    expect(
+      guestPlaceOrderSchema.safeParse({
+        username: "elitale",
+        tableId: "t1",
+        idempotencyKey: "abcd1234",
+        customerName: "x".repeat(81),
+        items: [{ menuItemId: "i1", quantity: 1 }],
+      }).success,
+    ).toBe(false);
+  });
 });

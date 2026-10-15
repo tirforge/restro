@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { MinusIcon, PlusIcon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
@@ -104,9 +105,11 @@ export function GuestOrderPage({
   readonly initialOrders: readonly GuestOrderSummaryDTO[];
 }) {
   const cart = useOrderCart();
+  const router = useRouter();
   const [configItem, setConfigItem] = useState<MenuItemDTO | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [verifyOpen, setVerifyOpen] = useState(false);
+  const [guestName, setGuestName] = useState("");
   const [verified, setVerified] = useState(initiallyVerified);
   const [expiresAt, setExpiresAt] = useState<number | null>(verifiedExpiresAt);
   const [phone, setPhone] = useState("");
@@ -248,10 +251,12 @@ export function GuestOrderPage({
     if (itemCount === 0) {
       return;
     }
+    const name = guestName.trim();
     place.execute({
       username,
       tableId,
       idempotencyKey: idempotencyKey.current,
+      ...(name ? { customerName: name } : {}),
       items: items(),
     });
   };
@@ -339,6 +344,13 @@ export function GuestOrderPage({
             <span>
               Ordering for <span className="font-medium">{tableLabel}</span>
             </span>
+            <button
+              type="button"
+              className="underline"
+              onClick={() => router.push(`/order/${username}`)}
+            >
+              Change
+            </button>
             {verified ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900">
                 ✓ Verified
@@ -480,6 +492,13 @@ export function GuestOrderPage({
                 ₹{bill.grandTotal.toFixed(2)}
               </span>
             </div>
+            <Input
+              value={guestName}
+              onChange={(e) => setGuestName(e.target.value.slice(0, 80))}
+              placeholder="Your name (optional — helps the server find you)"
+              autoComplete="name"
+              className="h-11"
+            />
             <DialogFooter>
               <Button
                 className="h-12 w-full text-base"

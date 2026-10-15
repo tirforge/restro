@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { GuestOrderPage } from "@/components/guest-order/guest-order-page";
+import { GuestTablePicker } from "@/components/guest-order/guest-table-picker";
 import { getGuestSession } from "@/lib/guest-session";
 import { maskPhone } from "@/lib/format";
 import {
@@ -41,12 +42,7 @@ export default async function OrderPage({
     );
   }
   if (result.status === "invalid_table") {
-    return (
-      <GuestNotice
-        title={result.restaurantName}
-        message="We couldn't find your table. Please scan the QR code on your table again, or ask a server."
-      />
-    );
+    return <GuestTablePicker username={username} restaurantName={result.restaurantName} />;
   }
 
   const { data } = result;
