@@ -24,8 +24,10 @@ const ERRORS: Record<string, string> = {
 };
 
 const orderLabel = (o: OrderDTO): string => {
-  if (o.tableLabel) return `Table ${o.tableLabel}`;
-  if (o.orderType === "DELIVERY") return `Delivery · ${o.customerName ?? "guest"}`;
+  const who = o.customerName ? ` · ${o.customerName}` : "";
+  if (o.tableLabel) return `Table ${o.tableLabel}${who}`;
+  if (o.orderType === "DELIVERY")
+    return `Delivery · ${o.customerName ?? "guest"}`;
   return `Takeaway · ${o.customerName ?? "guest"}`;
 };
 
