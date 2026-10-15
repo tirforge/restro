@@ -32,7 +32,7 @@ export default async function StockHistoryPage({
           title={item.name}
           description={`On hand ${item.onHand} ${UNIT_LABELS[item.unit]}`}
         />
-        <Button variant="outline" render={<Link href="/dashboard/inventory" />}>
+        <Button variant="outline" nativeButton={false} render={<Link href="/dashboard/inventory" />}>
           Back to inventory
         </Button>
       </div>

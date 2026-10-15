@@ -1,4 +1,4 @@
-import { generateOtpCode, hashOtpCode } from "@/lib/otp";
+import { generateOtpCode, getDevOtpCode, hashOtpCode, isDevOtpBypass } from "@/lib/otp";
 import { sendSms } from "@/lib/twilio";
 import {
   consumeChallenge,
@@ -31,12 +31,17 @@ export const requestGuestOtp = async (phone: string): Promise<void> => {
     throw new Error(GUEST_OTP_RATE_LIMITED);
   }
 
-  const code = generateOtpCode();
+  const code = isDevOtpBypass() ? getDevOtpCode() : generateOtpCode();
   await createOtpChallenge({
     phone,
     codeHash: hashOtpCode(code),
     expiresAt: new Date(Date.now() + OTP_TTL_MS),
   });
+
+  if (isDevOtpBypass()) {
+    console.log(`[dev-otp] guest code for ${phone}: ${code}`);
+    return;
+  }
 
   await sendSms(
     phone,

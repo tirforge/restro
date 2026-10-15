@@ -4,7 +4,7 @@ import {
     type MobileTokenPayload,
     type MobileTokenRole,
 } from "@/lib/mobile-session";
-import { generateOtpCode, hashOtpCode } from "@/lib/otp";
+import { generateOtpCode, getDevOtpCode, hashOtpCode, isDevOtpBypass } from "@/lib/otp";
 import { verifyPin as verifyManagerPin } from "@/lib/pin";
 import { hashStaffPin } from "@/lib/staff-pin";
 import { sendSms } from "@/lib/twilio";
@@ -156,17 +156,21 @@ export const requestMobileOtp = async (
     throw new Error(MOBILE_OTP_RATE_LIMITED);
   }
 
-  const code = generateOtpCode();
+  const code = isDevOtpBypass() ? getDevOtpCode() : generateOtpCode();
   const challenge = await createOtpChallenge({
     phone,
     codeHash: hashOtpCode(code),
     expiresAt: new Date(Date.now() + OTP_TTL_MS),
   });
 
-  await sendSms(
-    phone,
-    `Your ElitaleRestro verification code is ${code}. It expires in 5 minutes.`,
-  );
+  if (isDevOtpBypass()) {
+    console.log(`[dev-otp] mobile code for ${phone}: ${code}`);
+  } else {
+    await sendSms(
+      phone,
+      `Your ElitaleRestro verification code is ${code}. It expires in 5 minutes.`,
+    );
+  }
 
   return {
     challengeId: challenge.id,

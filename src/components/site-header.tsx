@@ -23,6 +23,7 @@ export function SiteHeader({
             variant="outline"
             size="sm"
             className="ml-auto"
+            nativeButton={false}
             render={
               <a
                 href={`/u/${staffLoginUsername}/login`}

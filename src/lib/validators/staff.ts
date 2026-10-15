@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 import { idSchema } from "@/lib/validators/shared";
-import { usernameSchema } from "@/lib/validators/restaurant";
 
 export const staffRoleSchema = z.enum(["WAITER", "KITCHEN", "MANAGEMENT"]);
 export const staffStatusSchema = z.enum(["ACTIVE", "ON_LEAVE", "INACTIVE"]);
@@ -16,6 +15,13 @@ const pinSchema = z
   .string()
   .trim()
   .regex(/^\d{4,6}$/, "PIN must be 4–6 digits");
+
+/**
+ * Username shape for login lookups. Restaurant usernames are slug-like and
+ * may contain hyphens (e.g. "demo-restaurant"), so lookups must not reuse the
+ * strict creation-time `usernameSchema` from the restaurant validators.
+ */
+const loginUsernameSchema = z.string().trim().min(1).max(40);
 
 const optionalText = (max: number) => z.string().trim().max(max).optional();
 
@@ -53,7 +59,7 @@ export const resetPinSchema = z.object({ id: idSchema, pin: pinSchema });
 export type ResetPinInput = z.infer<typeof resetPinSchema>;
 
 export const staffLoginSchema = z.object({
-  username: usernameSchema,
+  username: loginUsernameSchema,
   employeeCode: z.string().trim().min(1, "Employee ID is required").max(40),
   pin: pinSchema,
 });

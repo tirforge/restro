@@ -7,7 +7,7 @@ import {
 } from "@/lib/mobile-session";
 
 /** Routes reachable without an authenticated session (login + admin preview + public guest ordering). */
-const PUBLIC_ROUTES = ["/login", "/admin", "/order"];
+const PUBLIC_ROUTES = ["/", "/login", "/admin", "/order"];
 
 /** Auth pages a signed-in user should be redirected away from. */
 const AUTH_ROUTES = ["/login"];

@@ -172,8 +172,8 @@ export function InventoryManager({
                       </Button>
                       <Button
                         size="sm"
-                        variant="ghost"
-                        className="h-8 px-2 text-xs"
+                        variant="outline"
+                        nativeButton={false}
                         render={<Link href={`/dashboard/inventory/${item.id}`} />}
                       >
                         History

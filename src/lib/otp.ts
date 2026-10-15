@@ -12,3 +12,15 @@ export const hashOtpCode = (code: string): string => {
   }
   return createHmac("sha256", secret).update(code).digest("hex");
 };
+
+/**
+ * Dev-only OTP bypass. When `DEV_OTP_BYPASS=true`, OTP codes are logged to
+ * the server console instead of being texted via Twilio, so login and guest
+ * ordering work without SMS credentials. NEVER enable in production.
+ */
+export const isDevOtpBypass = (): boolean =>
+  process.env.DEV_OTP_BYPASS === "true";
+
+/** The OTP code issued while the dev bypass is active. Defaults to "123456". */
+export const getDevOtpCode = (): string =>
+  process.env.DEV_OTP_CODE || "123456";
