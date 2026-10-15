@@ -523,6 +523,14 @@ export function GuestOrderPage({
               We&apos;ll text you a one-time code to confirm your order.
             </p>
             <div className="flex flex-col gap-3">
+              <Input
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value.slice(0, 80))}
+                placeholder="Your name (optional)"
+                autoComplete="name"
+                className="h-11"
+                disabled={busy}
+              />
               <PhoneInput onChange={setPhone} disabled={otpSent || busy} />
               {otpSent ? (
                 <Input
