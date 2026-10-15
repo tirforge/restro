@@ -41,6 +41,7 @@ function UpiCollect({
   readonly amount: number;
 }) {
   const [qr, setQr] = useState<string | null>(null);
+  const fileSlug = `bill-${orderNumber}-${amount.toFixed(0)}`;
   const uri = useMemo(() => {
     try {
       return buildUpiUri({
@@ -87,6 +88,15 @@ function UpiCollect({
       >
         <span className="text-xl font-bold">G</span> Pay with GPay
       </a>
+      {qr ? (
+        <a
+          href={qr}
+          download={`${fileSlug}.png`}
+          className="text-sm font-medium underline"
+        >
+          Download QR
+        </a>
+      ) : null}
       <p className="text-muted-foreground text-center text-xs">
         On mobile this opens Google Pay with the amount filled in. On desktop,
         scan the QR with any UPI app. Confirm below once paid.
