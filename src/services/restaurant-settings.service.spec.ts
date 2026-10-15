@@ -49,6 +49,7 @@ const makeRestaurant = (overrides: Partial<Restaurant> = {}): Restaurant => ({
   name: "Spice Route",
   slug: "spice-route",
   username: null,
+  upiId: null,
   email: null,
   phone: null,
   city: null,

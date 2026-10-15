@@ -144,6 +144,9 @@ model Restaurant {
   sacCode             String?             @default("996331")
   nextInvoiceSeq      Int                 @default(1)
 
+  // UPI VPA for dynamic QR / GPay collections at the cashier (e.g. "shop@okhdfc").
+  upiId               String?
+
   // Business / brand profile
   legalName        String?
   tagline          String?

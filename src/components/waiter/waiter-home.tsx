@@ -122,6 +122,9 @@ export function WaiterHome({
         <PlusIcon className="size-5" />
         New order
       </Button>
+      <Button size="lg" variant="secondary" className="h-14 w-full text-base" nativeButton={false} render={<Link href={`/u/${username}/billing`} />}>
+        🧾 Cashier — collect & clear bills
+      </Button>
 
       <div className="flex flex-col gap-2">
         <h2 className="text-muted-foreground text-sm font-medium">
