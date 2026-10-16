@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { GuestOrderPage } from "@/components/guest-order/guest-order-page";
 import { GuestTablePicker } from "@/components/guest-order/guest-table-picker";
 import { getGuestSession } from "@/lib/guest-session";
+import { isGuestOtpSkipped } from "@/lib/guest-verification";
 import { maskPhone } from "@/lib/format";
 import {
   getGuestOrders,
@@ -47,15 +48,17 @@ export default async function OrderPage({
 
   const { data } = result;
   const session = await getGuestSession();
+  const otpSkipped = isGuestOtpSkipped();
   const verified =
-    session?.restaurantId === data.restaurantId &&
-    session?.tableId === data.tableId;
+    otpSkipped ||
+    (session?.restaurantId === data.restaurantId &&
+      session?.tableId === data.tableId);
 
   const verifiedPhoneMasked =
     verified && session ? maskPhone(session.phone) : null;
   const verifiedExpiresAt = verified && session ? session.expiresAt : null;
   const initialOrders =
-    verified && session
+    verified && session && !otpSkipped
       ? await getGuestOrders(
           session.restaurantId,
           session.phone,
@@ -72,6 +75,7 @@ export default async function OrderPage({
         restaurantName={data.restaurantName}
         menu={data.menu}
         initiallyVerified={Boolean(verified)}
+        verificationSkipped={otpSkipped}
         verifiedPhoneMasked={verifiedPhoneMasked}
         verifiedExpiresAt={verifiedExpiresAt}
         initialOrders={initialOrders}

@@ -91,6 +91,7 @@ export function GuestOrderPage({
   restaurantName,
   menu,
   initiallyVerified,
+  verificationSkipped,
   verifiedPhoneMasked,
   verifiedExpiresAt,
   initialOrders,
@@ -101,6 +102,8 @@ export function GuestOrderPage({
   readonly restaurantName: string;
   readonly menu: MenuDTO;
   readonly initiallyVerified: boolean;
+  /** OTP login disabled via env — menu opens with no phone gate. */
+  readonly verificationSkipped: boolean;
   readonly verifiedPhoneMasked: string | null;
   readonly verifiedExpiresAt: number | null;
   readonly initialOrders: readonly GuestOrderSummaryDTO[];
@@ -343,9 +346,11 @@ export function GuestOrderPage({
   }
 
   // Table first, login second, menu last: guests verify their phone before
-  // they can browse and order. (verify.onSuccess calls submitOrder, which
-  // safely no-ops on the empty cart at this stage.)
-  if (!verified) {
+  // they can browse and order — unless the restaurant disabled OTP logins
+  // (GUEST_OTP_DISABLED), in which case the menu opens straight away.
+  // (verify.onSuccess calls submitOrder, which safely no-ops on the empty
+  // cart at this stage.)
+  if (!verified && !verificationSkipped) {
     return (
       <div className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
         <div className="bg-primary/10 text-primary flex size-14 items-center justify-center rounded-2xl text-2xl">
@@ -420,7 +425,7 @@ export function GuestOrderPage({
             >
               Change
             </button>
-            {verified ? (
+            {verified && !verificationSkipped ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-900">
                 ✓ Verified
                 {(verifiedPhoneMasked ?? (phone ? maskPhone(phone) : null))
@@ -430,7 +435,7 @@ export function GuestOrderPage({
             ) : null}
           </p>
         </div>
-        {verified ? (
+        {verified && !verificationSkipped ? (
           <div className="flex shrink-0 items-center gap-1.5">
             {myOrders.length > 0 ? (
               <Button

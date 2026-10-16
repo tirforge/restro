@@ -6,6 +6,7 @@ import {
   destroyGuestSession,
   getGuestSession,
 } from "@/lib/guest-session";
+import { isGuestOtpSkipped } from "@/lib/guest-verification";
 import {
   guestPlaceOrderSchema,
   guestRequestOtpSchema,
@@ -46,11 +47,22 @@ export const guestVerifyOtpAction = withValidation(
   },
 );
 
-/** Place the order — requires a verified guest session bound to this table. */
+/** Place the order — requires a verified guest session bound to this table,
+ * unless OTP is disabled via GUEST_OTP_DISABLED (walk-in mode). */
 export const guestPlaceOrderAction = withValidation(
   guestPlaceOrderSchema,
   async (data): Promise<OrderDTO> => {
     const target = await resolveGuestOrderTarget(data.username, data.tableId);
+    if (isGuestOtpSkipped()) {
+      return placeGuestOrder(
+        {
+          restaurantId: target.restaurantId,
+          tableId: target.tableId,
+          phone: null,
+        },
+        data,
+      );
+    }
     const session = await getGuestSession();
     if (
       !session ||
@@ -70,10 +82,15 @@ export const guestPlaceOrderAction = withValidation(
   },
 );
 
-/** The verified guest's own orders (by phone + current table) with live status. */
+/** The verified guest's own orders (by phone + current table) with live status.
+ * In walk-in mode (OTP disabled) there is no phone to scope by — tracking
+ * is unavailable, so this returns an empty list. */
 export const guestMyOrdersAction = async (): Promise<
   ActionResult<GuestOrderSummaryDTO[]>
 > => {
+  if (isGuestOtpSkipped()) {
+    return success([]);
+  }
   const session = await getGuestSession();
   if (!session) {
     return failure<GuestOrderSummaryDTO[]>(GUEST_NOT_VERIFIED);

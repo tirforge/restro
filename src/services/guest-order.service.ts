@@ -60,7 +60,8 @@ export const resolveGuestOrderTarget = async (
 export interface GuestOrderActor {
   readonly restaurantId: string;
   readonly tableId: string;
-  readonly phone: string;
+  /** Verified phone, or null when OTP is disabled via GUEST_OTP_DISABLED. */
+  readonly phone: string | null;
 }
 
 /**
@@ -91,7 +92,7 @@ export const placeGuestOrder = async (
     tableId: actor.tableId,
     idempotencyKey: input.idempotencyKey,
     customerName: input.customerName,
-    customerPhone: actor.phone,
+    customerPhone: actor.phone ?? undefined,
     note: input.note,
     items: input.items,
   });
