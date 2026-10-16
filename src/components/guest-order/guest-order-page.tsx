@@ -313,7 +313,7 @@ export function GuestOrderPage({
         <div className="bg-primary/10 text-primary flex size-16 items-center justify-center rounded-full text-3xl">
           ✓
         </div>
-        <h1 className="text-xl font-semibold">Order placed</h1>
+        <h1 className="text-xl font-bold">Order placed</h1>
         <p className="text-muted-foreground text-sm">
           Your order for <span className="font-medium">{tableLabel}</span> has
           been sent to the kitchen. A server will bring it over.
@@ -346,7 +346,7 @@ export function GuestOrderPage({
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col p-4 pb-28">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h1 className="text-lg font-semibold">{restaurantName}</h1>
+          <h1 className="text-xl font-bold">{restaurantName}</h1>
           <p className="text-muted-foreground flex flex-wrap items-center gap-2 text-sm">
             <span>
               Ordering for <span className="font-medium">{tableLabel}</span>

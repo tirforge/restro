@@ -155,11 +155,13 @@ export function KitchenDisplay({
   restaurantName,
   staffName,
   tickets,
+  canAccessBilling,
 }: {
   readonly username: string;
   readonly restaurantName: string;
   readonly staffName: string;
   readonly tickets: readonly KitchenTicketDTO[];
+  readonly canAccessBilling: boolean;
 }) {
   const router = useRouter();
   const { supported, enabled, toggle, announce } = useAnnouncer();
@@ -231,15 +233,17 @@ export function KitchenDisplay({
         </div>
       </div>
 
-      <Button
-        size="lg"
-        variant="secondary"
-        className="h-14 w-full text-base"
-        nativeButton={false}
-        render={<Link href={`/u/${username}/billing`} />}
-      >
-        🧾 Cashier — collect & clear bills
-      </Button>
+      {canAccessBilling ? (
+        <Button
+          size="lg"
+          variant="secondary"
+          className="h-14 w-full text-base"
+          nativeButton={false}
+          render={<Link href={`/u/${username}/billing`} />}
+        >
+          🧾 Cashier — collect & clear bills
+        </Button>
+      ) : null}
 
       <h2 className="text-muted-foreground text-sm font-medium">
         Tickets {tickets.length > 0 ? `(${tickets.length})` : ""}
@@ -256,6 +260,12 @@ export function KitchenDisplay({
           ))}
         </ul>
       )}
+      <a
+        className="text-center text-xs text-muted-foreground underline"
+        href={`/u/${username}`}
+      >
+        ‹ All stations
+      </a>
     </div>
   );
 }

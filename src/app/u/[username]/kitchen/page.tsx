@@ -21,7 +21,8 @@ export default async function KitchenStationPage({
   if (!restaurant || restaurant.id !== ctx.restaurantId) {
     redirect(`/u/${username}/login`);
   }
-  if (!resolveStationsFor(ctx.roles).includes("kitchen")) {
+  const stations = resolveStationsFor(ctx.roles);
+  if (!stations.includes("kitchen")) {
     redirect(`/u/${username}`);
   }
 
@@ -32,6 +33,7 @@ export default async function KitchenStationPage({
         restaurantName={restaurant.name}
         staffName={ctx.name}
         tickets={await listKitchenTickets(ctx.restaurantId)}
+        canAccessBilling={stations.includes("billing")}
       />
     </main>
   );

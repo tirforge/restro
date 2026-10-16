@@ -10,7 +10,7 @@ import { findRestaurantByUsername } from "@/repositories/restaurant.repository";
 /**
  * Cashier billing station — settle open bills with cash or UPI (dynamic
  * GPay QR). Runs on the staff session; no manager/admin login required.
- * WAITER + MANAGEMENT roles may settle; KITCHEN is view-only.
+ * WAITER + CASHIER + MANAGEMENT roles may settle.
  */
 export default async function CashierBillingPage({
   params,
@@ -40,7 +40,7 @@ export default async function CashierBillingPage({
         restaurantName={restaurant.name}
         upiId={full?.upiId ?? null}
         staffName={ctx.name}
-        staffRole={ctx.role}
+        staffRoles={ctx.roles}
         initialOrders={await listOrders(ctx.restaurantId, ["OPEN"])}
       />
     </main>

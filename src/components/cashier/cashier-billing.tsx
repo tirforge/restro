@@ -1,13 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 import QRCode from "qrcode";
+import { LogOutIcon } from "lucide-react";
 import { toast } from "sonner";
 
 import {
   staffOpenBillsAction,
   staffSettleAction,
 } from "@/actions/staff-billing.actions";
+import { staffLogoutAction } from "@/actions/staff-auth.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { orderRunningTotal } from "@/components/pos/types";
@@ -19,7 +21,7 @@ import type { StaffRole } from "@/types/staff";
 
 const ERRORS: Record<string, string> = {
   PAYMENT_SHORT: "Tendered amount is less than the bill total.",
-  STAFF_FORBIDDEN: "Only waiter/manager staff can settle bills.",
+  STAFF_FORBIDDEN: "Your role can't settle bills — ask a cashier or manager.",
   NO_STAFF_SESSION: "Session expired — sign in again.",
   ORDER_NOT_OPEN: "This bill is no longer open.",
 };
@@ -113,14 +115,14 @@ export function CashierBilling({
   restaurantName,
   upiId,
   staffName,
-  staffRole,
+  staffRoles,
   initialOrders,
 }: {
   readonly username: string;
   readonly restaurantName: string;
   readonly upiId: string | null;
   readonly staffName: string;
-  readonly staffRole: StaffRole;
+  readonly staffRoles: readonly StaffRole[];
   readonly initialOrders: readonly OrderDTO[];
 }) {
   const [orders, setOrders] = useState<readonly OrderDTO[]>(initialOrders);
@@ -133,7 +135,12 @@ export function CashierBilling({
   const tenderedNum = Number(tendered);
   const change =
     mode === "CASH" && Number.isFinite(tenderedNum) ? tenderedNum - total : 0;
-  const canSettle = staffRole === "WAITER" || staffRole === "MANAGEMENT";
+  // Mirrors the server gate in staffSettleAction: anyone whose stations
+  // include billing may settle.
+  const canSettle =
+    staffRoles.includes("WAITER") ||
+    staffRoles.includes("CASHIER") ||
+    staffRoles.includes("MANAGEMENT");
 
   const refresh = useServerAction(staffOpenBillsAction, {
     onSuccess: (data) => {
@@ -146,6 +153,7 @@ export function CashierBilling({
 
   // Keep the latest refresh closure for the polling interval below.
   const refreshRef = useRef(refresh);
+  const [pending, startTransition] = useTransition();
   useEffect(() => {
     refreshRef.current = refresh;
   });
@@ -202,23 +210,28 @@ export function CashierBilling({
     <div className="mx-auto flex min-h-svh w-full max-w-3xl flex-col gap-4 p-4 pb-10">
       <div className="flex items-center justify-between gap-2">
         <div>
-          <h1 className="text-xl font-bold">Cashier</h1>
-          <p className="text-muted-foreground text-sm">
-            {restaurantName} · {staffName} ·{" "}
-            <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
-              <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
-              Live
-            </span>
-          </p>
+          <p className="text-muted-foreground text-sm">{restaurantName}</p>
+          <h1 className="text-xl font-bold">Cashier · {staffName}</h1>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refresh.execute({})}>
-          Refresh
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button variant="outline" size="sm" onClick={() => refresh.execute({})}>
+            Refresh
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            disabled={pending}
+            onClick={() => startTransition(() => staffLogoutAction(username))}
+          >
+            <LogOutIcon className="size-4" />
+            Log out
+          </Button>
+        </div>
       </div>
 
       {!canSettle ? (
         <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
-          Kitchen staff can view bills here — settling needs a waiter or
+          You can view bills here — settling needs a waiter, cashier, or
           manager sign-in.
         </p>
       ) : null}
@@ -352,7 +365,7 @@ export function CashierBilling({
                 className="text-center text-xs text-muted-foreground underline"
                 href={`/u/${username}`}
               >
-                Back to staff home
+                ‹ All stations
               </a>
             </>
           )}

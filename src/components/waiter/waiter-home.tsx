@@ -182,6 +182,12 @@ export function WaiterHome({
           </ul>
         )}
       </div>
+      <a
+        className="text-center text-xs text-muted-foreground underline"
+        href={`/u/${username}`}
+      >
+        ‹ All stations
+      </a>
     </div>
   );
 }
