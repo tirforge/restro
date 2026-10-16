@@ -58,3 +58,42 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Seed smoke fixture
+        run: npx tsx scripts/ci-smoke-seed.ts | grep SMOKE_TABLE_ID >> "$GITHUB_ENV"
+
+      - name: Smoke — OTP mode (table → login gate → no menu yet)
+        run: |
+          pkill -f "next-server" || true
+          (npm start -- --port 3000 > /tmp/smoke-otp.log 2>&1 & echo $! > /tmp/smoke.pid)
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000/ > /dev/null && break
+            sleep 2
+          done
+          curl -sf http://localhost:3000/ | grep -q "Staff Login"
+          curl -sf http://localhost:3000/u/demo-restaurant/login > /dev/null
+          curl -sf http://localhost:3000/order/demo-restaurant | grep -q "Which table are you sitting at"
+          BODY=$(curl -sf "http://localhost:3000/order/demo-restaurant?table=${SMOKE_TABLE_ID}")
+          echo "$BODY" | grep -q "Verify your phone"
+          echo "$BODY" | grep -q "Smoke Thali" && exit 1 || true
+          kill "$(cat /tmp/smoke.pid)"
+
+      - name: Smoke — walk-in mode (table → menu, no login)
+        env:
+          GUEST_OTP_DISABLED: "true"
+        run: |
+          pkill -f "next-server" || true
+          (npm start -- --port 3000 > /tmp/smoke-walkin.log 2>&1 & echo $! > /tmp/smoke.pid)
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000/ > /dev/null && break
+            sleep 2
+          done
+          BODY=$(curl -sf "http://localhost:3000/order/demo-restaurant?table=${SMOKE_TABLE_ID}")
+          echo "$BODY" | grep -q "Smoke Thali"
+          echo "$BODY" | grep -q "Place order"
+          echo "$BODY" | grep -q "Verify your phone" && exit 1 || true
+          kill "$(cat /tmp/smoke.pid)"
+
+      - name: Stop smoke server
+        if: always()
+        run: pkill -f "next-server" || true
