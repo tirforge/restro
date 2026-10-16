@@ -70,12 +70,19 @@ jobs:
             curl -sf http://localhost:3000/ > /dev/null && break
             sleep 2
           done
-          curl -sf http://localhost:3000/ | grep -q "Staff Login"
-          curl -sf http://localhost:3000/u/demo-restaurant/login > /dev/null
-          curl -sf http://localhost:3000/order/demo-restaurant | grep -q "Which table are you sitting at"
+          check() { # check <label> <url> <pattern>
+            local body
+            body=$(curl -sf "$2") || { echo "FAIL $1: HTTP error for $2"; return 1; }
+            echo "$body" | grep -q "$3" || { echo "FAIL $1: pattern '$3' missing. Got: $(echo "$body" | head -c 400)"; return 1; }
+            echo "PASS $1"
+          }
+          check "home" http://localhost:3000/ "Staff Login"
+          check "staff-login" http://localhost:3000/u/demo-restaurant/login "Smoke Waiter"
+          check "table-picker" http://localhost:3000/order/demo-restaurant "Which table are you sitting at"
           BODY=$(curl -sf "http://localhost:3000/order/demo-restaurant?table=${SMOKE_TABLE_ID}")
-          echo "$BODY" | grep -q "Verify your phone"
-          echo "$BODY" | grep -q "Smoke Thali" && exit 1 || true
+          echo "$BODY" | grep -q "Verify your phone" || { echo "FAIL gate: no OTP gate. Got: $(echo "$BODY" | head -c 400)"; exit 1; }
+          echo "PASS otp-gate"
+          echo "$BODY" | grep -q "Smoke Thali" && { echo "FAIL gate: menu leaked before login"; exit 1; } || echo "PASS menu-hidden"
           kill "$(cat /tmp/smoke.pid)"
 
       - name: Smoke — walk-in mode (table → menu, no login)
@@ -89,9 +96,11 @@ jobs:
             sleep 2
           done
           BODY=$(curl -sf "http://localhost:3000/order/demo-restaurant?table=${SMOKE_TABLE_ID}")
-          echo "$BODY" | grep -q "Smoke Thali"
-          echo "$BODY" | grep -q "Place order"
-          echo "$BODY" | grep -q "Verify your phone" && exit 1 || true
+          echo "$BODY" | grep -q "Smoke Thali" || { echo "FAIL walkin: no menu. Got: $(echo "$BODY" | head -c 400)"; exit 1; }
+          echo "PASS walkin-menu"
+          echo "$BODY" | grep -q "Place order" || { echo "FAIL walkin: no order button"; exit 1; }
+          echo "PASS walkin-order-button"
+          echo "$BODY" | grep -q "Verify your phone" && { echo "FAIL walkin: login gate shown"; exit 1; } || echo "PASS no-gate"
           kill "$(cat /tmp/smoke.pid)"
 
       - name: Stop smoke server
