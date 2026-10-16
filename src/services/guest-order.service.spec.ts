@@ -11,6 +11,7 @@ vi.mock("@/repositories/table.repository", () => ({
 }));
 vi.mock("@/repositories/order.repository", () => ({
   findOrdersForGuest: vi.fn(),
+  findOrdersForWalkInTable: vi.fn(),
 }));
 vi.mock("@/services/table.service", () => ({
   resolveTableForOrder: vi.fn(),
@@ -26,7 +27,10 @@ vi.mock("@/services/order.service", () => ({
 }));
 
 import type { OrderWithRelations } from "@/repositories/order.repository";
-import { findOrdersForGuest } from "@/repositories/order.repository";
+import {
+  findOrdersForGuest,
+  findOrdersForWalkInTable,
+} from "@/repositories/order.repository";
 import { findRestaurantByUsername } from "@/repositories/restaurant.repository";
 import { findTablesByRestaurant } from "@/repositories/table.repository";
 import { getMenu } from "@/services/menu-item.service";
@@ -42,6 +46,7 @@ import {
   GUEST_ORDER_RESTAURANT_NOT_FOUND,
   GUEST_ORDER_TABLE_INVALID,
   getGuestOrders,
+  getGuestWalkInOrders,
   listGuestTables,
   loadGuestOrderPage,
   placeGuestOrder,
@@ -326,5 +331,38 @@ describe("getGuestOrders", () => {
     expect(summary.status).toBe("COMPLETED");
     expect(summary.kitchenStatus).toBeNull();
     expect(summary.total).toBe(210);
+  });
+});
+
+describe("getGuestWalkInOrders", () => {
+  it("returns [] without touching the db when the name is blank", async () => {
+    expect(await getGuestWalkInOrders("res_1", "t1", "   ")).toEqual([]);
+    expect(await getGuestWalkInOrders("res_1", "t1")).toEqual([]);
+    expect(findOrdersForWalkInTable).not.toHaveBeenCalled();
+  });
+
+  it("scopes to the table + trimmed name", async () => {
+    vi.mocked(findOrdersForWalkInTable).mockResolvedValue([
+      {
+        id: "o1",
+        orderNumber: 3,
+        createdAt: new Date("2026-01-01T10:00:00Z"),
+        orderType: "DINE_IN",
+        tableLabel: "T1",
+        status: "OPEN",
+        grandTotal: 100,
+        items: [],
+      } as unknown as OrderWithRelations,
+    ]);
+
+    const [summary] = await getGuestWalkInOrders("res_1", "t1", "  Asha ");
+
+    expect(findOrdersForWalkInTable).toHaveBeenCalledWith(
+      "res_1",
+      "t1",
+      "Asha",
+      15,
+    );
+    expect(summary).toMatchObject({ id: "o1", tableLabel: "T1" });
   });
 });

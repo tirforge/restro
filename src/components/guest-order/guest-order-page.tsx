@@ -162,11 +162,20 @@ export function GuestOrderPage({
   }, [storageKey, cart.cart, verified, expiresAt]);
 
   const refreshOrders = useCallback(async () => {
-    const res = await guestMyOrdersAction();
+    // Walk-in mode has no session: scope tracking to this table + name.
+    const res = await guestMyOrdersAction(
+      verificationSkipped
+        ? {
+            username,
+            tableId,
+            customerName: guestName.trim() || undefined,
+          }
+        : undefined,
+    );
     if (res.success) {
       setMyOrders(res.data ?? []);
     }
-  }, []);
+  }, [verificationSkipped, username, tableId, guestName]);
 
   const refreshOrdersRef = useRef(refreshOrders);
   useEffect(() => {
@@ -289,7 +298,16 @@ export function GuestOrderPage({
     onError: (m) => toast.error(toMessage(m)),
   });
 
+  // Walk-in tracking is keyed on table + name, so a name is required
+  // before the first order when OTP is disabled.
+  const needName = verificationSkipped && guestName.trim().length === 0;
+
   const onPlaceTap = () => {
+    if (needName) {
+      // Walk-in tracking is keyed on table + name — collect the name first.
+      setReviewOpen(true);
+      return;
+    }
     if (verified) {
       submitOrder();
       return;
@@ -569,14 +587,23 @@ export function GuestOrderPage({
             <Input
               value={guestName}
               onChange={(e) => setGuestName(e.target.value.slice(0, 80))}
-              placeholder="Your name (optional — helps the server find you)"
+              placeholder={
+                verificationSkipped
+                  ? "Your name (needed to track your order)"
+                  : "Your name (optional — helps the server find you)"
+              }
               autoComplete="name"
               className="h-11"
             />
+            {needName ? (
+              <p className="text-muted-foreground text-xs">
+                Add your name above — it&apos;s how you track this order.
+              </p>
+            ) : null}
             <DialogFooter>
               <Button
                 className="h-12 w-full text-base"
-                disabled={itemCount === 0 || busy}
+                disabled={itemCount === 0 || busy || needName}
                 onClick={onPlaceTap}
               >
                 {busy ? "Placing…" : verified ? "Place order" : "Verify & place"}

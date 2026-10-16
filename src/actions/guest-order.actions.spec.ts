@@ -18,6 +18,7 @@ vi.mock("@/services/guest-order.service", () => ({
   resolveGuestOrderTarget: vi.fn(),
   placeGuestOrder: vi.fn(),
   getGuestOrders: vi.fn(),
+  getGuestWalkInOrders: vi.fn(),
 }));
 
 import {
@@ -27,6 +28,7 @@ import {
 } from "@/lib/guest-session";
 import {
   getGuestOrders,
+  getGuestWalkInOrders,
   placeGuestOrder,
   resolveGuestOrderTarget,
 } from "@/services/guest-order.service";
@@ -155,6 +157,33 @@ describe("guestMyOrdersAction", () => {
 
     expect(result.success).toBe(false);
     expect(getGuestOrders).not.toHaveBeenCalled();
+  });
+
+  it("scopes to table + name without a session when OTP is disabled", async () => {
+    vi.stubEnv("GUEST_OTP_DISABLED", "true");
+    vi.mocked(getGuestWalkInOrders).mockResolvedValue([]);
+
+    const result = await guestMyOrdersAction({
+      username: "elitale",
+      tableId: "t1",
+      customerName: "Asha",
+    });
+
+    expect(result.success).toBe(true);
+    expect(resolveGuestOrderTarget).toHaveBeenCalledWith("elitale", "t1");
+    expect(getGuestWalkInOrders).toHaveBeenCalledWith("res_1", "t1", "Asha");
+    expect(getGuestSession).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
+  });
+
+  it("returns [] without a table lookup when OTP is disabled", async () => {
+    vi.stubEnv("GUEST_OTP_DISABLED", "true");
+
+    const result = await guestMyOrdersAction();
+
+    expect(result).toEqual({ success: true, data: [] });
+    expect(getGuestWalkInOrders).not.toHaveBeenCalled();
+    vi.unstubAllEnvs();
   });
 });
 

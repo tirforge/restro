@@ -46,6 +46,7 @@ import {
   aggregateSettledBetween,
   createOrder,
   findOrdersForGuest,
+  findOrdersForWalkInTable,
   fireUnsentItems,
   maxOrderNumber,
   settleManyOrders,
@@ -126,6 +127,41 @@ describe("orderRepository", () => {
         },
         orderBy: { createdAt: "desc" },
         take: 15,
+      }),
+    );
+  });
+
+  it("findOrdersForWalkInTable scopes to the table + name, most recent first", async () => {
+    orderFindMany.mockResolvedValue([]);
+
+    await findOrdersForWalkInTable("res_1", "t1", "Asha", 15);
+
+    expect(orderFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          restaurantId: "res_1",
+          deletedAt: null,
+          tableId: "t1",
+          customerName: { equals: "Asha", mode: "insensitive" },
+        },
+        orderBy: { createdAt: "desc" },
+        take: 15,
+      }),
+    );
+  });
+
+  it("findOrdersForWalkInTable omits the name filter when null", async () => {
+    orderFindMany.mockResolvedValue([]);
+
+    await findOrdersForWalkInTable("res_1", "t1", null, 15);
+
+    expect(orderFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: {
+          restaurantId: "res_1",
+          deletedAt: null,
+          tableId: "t1",
+        },
       }),
     );
   });

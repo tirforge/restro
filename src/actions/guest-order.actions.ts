@@ -14,6 +14,7 @@ import {
 } from "@/lib/validators/guest-order";
 import {
   getGuestOrders,
+  getGuestWalkInOrders,
   listGuestTables,
   placeGuestOrder,
   resolveGuestOrderTarget,
@@ -83,13 +84,34 @@ export const guestPlaceOrderAction = withValidation(
 );
 
 /** The verified guest's own orders (by phone + current table) with live status.
- * In walk-in mode (OTP disabled) there is no phone to scope by — tracking
- * is unavailable, so this returns an empty list. */
-export const guestMyOrdersAction = async (): Promise<
-  ActionResult<GuestOrderSummaryDTO[]>
-> => {
+ * In walk-in mode (OTP disabled) there is no session — the caller passes the
+ * table + name instead, and tracking scopes to those. */
+export const guestMyOrdersAction = async (lookup?: {
+  readonly username?: string;
+  readonly tableId?: string;
+  readonly customerName?: string;
+}): Promise<ActionResult<GuestOrderSummaryDTO[]>> => {
   if (isGuestOtpSkipped()) {
-    return success([]);
+    if (!lookup?.username || !lookup?.tableId) {
+      return success([]);
+    }
+    try {
+      const target = await resolveGuestOrderTarget(
+        lookup.username,
+        lookup.tableId,
+      );
+      return success(
+        await getGuestWalkInOrders(
+          target.restaurantId,
+          target.tableId,
+          lookup.customerName,
+        ),
+      );
+    } catch (error) {
+      return failure<GuestOrderSummaryDTO[]>(
+        error instanceof Error ? error.message : "Something went wrong",
+      );
+    }
   }
   const session = await getGuestSession();
   if (!session) {

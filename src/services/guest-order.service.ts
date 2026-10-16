@@ -2,6 +2,7 @@ import type { GuestPlaceOrderInput } from "@/lib/validators/guest-order";
 import { deriveKitchenStatus } from "@/lib/kitchen";
 import {
   findOrdersForGuest,
+  findOrdersForWalkInTable,
   type OrderWithRelations,
 } from "@/repositories/order.repository";
 import { findRestaurantByUsername } from "@/repositories/restaurant.repository";
@@ -235,6 +236,29 @@ export const getGuestOrders = async (
     restaurantId,
     phone,
     tableId,
+    GUEST_ORDER_LIMIT,
+  );
+  return orders.map(toGuestSummary);
+};
+
+/**
+ * Walk-in (OTP-disabled) tracking: the table + guest name stand in for the
+ * phone. An empty name matches nothing — the UI requires a name before
+ * placing, so tracking always has a key.
+ */
+export const getGuestWalkInOrders = async (
+  restaurantId: string,
+  tableId: string,
+  customerName?: string,
+): Promise<GuestOrderSummaryDTO[]> => {
+  const name = customerName?.trim();
+  if (!name) {
+    return [];
+  }
+  const orders = await findOrdersForWalkInTable(
+    restaurantId,
+    tableId,
+    name,
     GUEST_ORDER_LIMIT,
   );
   return orders.map(toGuestSummary);

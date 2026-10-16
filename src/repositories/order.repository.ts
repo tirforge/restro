@@ -159,6 +159,30 @@ export const findOrdersForGuest = (
     take: limit,
   });
 
+/**
+ * Walk-in (OTP-disabled) order lookup: orders on one table, optionally
+ * narrowed to a guest name (case-insensitive). Most recent first.
+ */
+export const findOrdersForWalkInTable = (
+  restaurantId: string,
+  tableId: string,
+  customerName: string | null,
+  limit: number,
+): Promise<OrderWithRelations[]> =>
+  prisma.order.findMany({
+    where: {
+      restaurantId,
+      deletedAt: null,
+      tableId,
+      ...(customerName
+        ? { customerName: { equals: customerName, mode: "insensitive" as const } }
+        : {}),
+    },
+    include: ORDER_INCLUDE,
+    orderBy: { createdAt: "desc" },
+    take: limit,
+  });
+
 export const maxOrderNumber = async (restaurantId: string): Promise<number> => {
   const top = await prisma.order.findFirst({
     where: { restaurantId },
