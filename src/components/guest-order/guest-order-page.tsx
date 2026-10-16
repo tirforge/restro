@@ -172,7 +172,7 @@ export function GuestOrderPage({
     }
     const id = setInterval(() => {
       void refreshOrders();
-    }, 10000);
+    }, 2000);
     return () => clearInterval(id);
   }, [verified, refreshOrders]);
 

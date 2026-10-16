@@ -154,7 +154,7 @@ export function CashierBilling({
   useEffect(() => {
     const id = setInterval(() => {
       if (!document.hidden) void refreshRef.current.execute({});
-    }, 10000);
+    }, 2000);
     return () => clearInterval(id);
   }, []);
 

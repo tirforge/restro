@@ -72,7 +72,7 @@ export function WaiterHome({
 
   // Auto-refresh so kitchen status (Preparing / Ready) stays current hands-free.
   useEffect(() => {
-    const id = setInterval(() => router.refresh(), 10000);
+    const id = setInterval(() => router.refresh(), 2000);
     return () => clearInterval(id);
   }, [router]);
 

@@ -80,7 +80,7 @@ export function OrdersBoard({
 
   // Poll every 10s so new orders surface hands-free.
   useEffect(() => {
-    const id = setInterval(() => router.refresh(), 10000);
+    const id = setInterval(() => router.refresh(), 2000);
     return () => clearInterval(id);
   }, [router]);
 
