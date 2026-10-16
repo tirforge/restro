@@ -361,16 +361,16 @@ export function CashierBilling({
                     ? `Confirm cash payment · ₹${total.toFixed(0)}`
                     : `Mark UPI payment successful ✓ · ₹${total.toFixed(0)}`}
               </Button>
-              <a
-                className="text-center text-xs text-muted-foreground underline"
-                href={`/u/${username}`}
-              >
-                ‹ All stations
-              </a>
             </>
           )}
         </div>
       </div>
+      <a
+        className="text-center text-xs text-muted-foreground underline"
+        href={`/u/${username}`}
+      >
+        ‹ All stations
+      </a>
     </div>
   );
 }
