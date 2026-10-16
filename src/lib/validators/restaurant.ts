@@ -149,6 +149,18 @@ export type UpdateUsernameInput = z.infer<typeof updateUsernameSchema>;
 export const setSelfOrderSchema = z.object({ enabled: z.boolean() });
 export type SetSelfOrderInput = z.infer<typeof setSelfOrderSchema>;
 
+/** UPI VPA for the cashier QR (`name@bank`). Empty string clears it. */
+export const setUpiIdSchema = z.object({
+  upiId: z
+    .string()
+    .trim()
+    .max(256)
+    .refine((v) => v === "" || /^[\w.\-]{2,256}@[a-zA-Z]{2,64}$/.test(v), {
+      message: "Enter a valid UPI ID (name@bank)",
+    }),
+});
+export type SetUpiIdInput = z.infer<typeof setUpiIdSchema>;
+
 export const updateGeolocationSchema = z.object({
   latitude: z.coerce.number().min(-90).max(90),
   longitude: z.coerce.number().min(-180).max(180),

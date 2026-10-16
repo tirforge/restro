@@ -26,6 +26,7 @@ const data: StaffWriteData = {
   employeeCode: "E1",
   name: "Ramesh",
   role: "WAITER",
+  extraRoles: [],
   status: "ACTIVE",
   phone: "999",
   email: null,

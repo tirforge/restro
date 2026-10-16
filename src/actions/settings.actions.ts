@@ -8,6 +8,7 @@ import {
   removeVideoSchema,
   setInvoiceFooterSchema,
   setSelfOrderSchema,
+  setUpiIdSchema,
   updateGeolocationSchema,
   updateProfileSchema,
   updateTaxProfileSchema,
@@ -29,6 +30,7 @@ import {
   regenerateUsername,
   setInvoiceFooterNote,
   setSelfOrderEnabled,
+  setUpiId,
   updateGeolocation,
   clearGeolocation,
 } from "@/services/restaurant-settings.service";
@@ -57,6 +59,10 @@ export const updateUsernameAction = withManagerValidation(
 export const setSelfOrderEnabledAction = withManagerValidation(
   setSelfOrderSchema,
   (data, ctx) => setSelfOrderEnabled(ctx.restaurantId, data.enabled),
+);
+
+export const setUpiIdAction = withManagerValidation(setUpiIdSchema, (data, ctx) =>
+  setUpiId(ctx.restaurantId, data.upiId),
 );
 
 export const setInvoiceFooterAction = withManagerValidation(

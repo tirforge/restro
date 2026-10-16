@@ -9,6 +9,7 @@ vi.mock("@/services/restaurant-settings.service", () => ({
   updateUsername: vi.fn(),
   regenerateUsername: vi.fn(),
   setSelfOrderEnabled: vi.fn(),
+  setUpiId: vi.fn(),
   setInvoiceFooterNote: vi.fn(),
   updateGeolocation: vi.fn(),
   clearGeolocation: vi.fn(),
@@ -33,6 +34,7 @@ import {
   regenerateUsername,
   setInvoiceFooterNote,
   setSelfOrderEnabled,
+  setUpiId,
   updateRestaurantProfile,
   updateTaxProfile,
   updateUsername,
@@ -47,6 +49,7 @@ import {
   removeVideoAction,
   setInvoiceFooterAction,
   setSelfOrderEnabledAction,
+  setUpiIdAction,
   updateRestaurantProfileAction,
   updateTaxProfileAction,
   updateUsernameAction,
@@ -261,6 +264,37 @@ describe("setSelfOrderEnabledAction", () => {
 
     expect(result.success).toBe(false);
     expect(setSelfOrderEnabled).not.toHaveBeenCalled();
+  });
+});
+
+describe("setUpiIdAction", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(getManagerContextOrNull).mockResolvedValue({
+      userId: "u1",
+      restaurantId: "res_1",
+    });
+  });
+
+  it("delegates a valid VPA with the manager's restaurant", async () => {
+    const result = await setUpiIdAction({ upiId: "shop@okhdfc" });
+
+    expect(result.success).toBe(true);
+    expect(setUpiId).toHaveBeenCalledWith("res_1", "shop@okhdfc");
+  });
+
+  it("clears the UPI ID on an empty string", async () => {
+    const result = await setUpiIdAction({ upiId: "" });
+
+    expect(result.success).toBe(true);
+    expect(setUpiId).toHaveBeenCalledWith("res_1", "");
+  });
+
+  it("rejects a malformed VPA", async () => {
+    const result = await setUpiIdAction({ upiId: "not-a-vpa" });
+
+    expect(result.success).toBe(false);
+    expect(setUpiId).not.toHaveBeenCalled();
   });
 });
 

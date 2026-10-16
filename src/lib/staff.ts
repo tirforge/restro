@@ -8,6 +8,7 @@ import type {
 export const STAFF_ROLE_OPTIONS: readonly { value: StaffRole; label: string }[] = [
   { value: "WAITER", label: "Waiter" },
   { value: "KITCHEN", label: "Kitchen" },
+  { value: "CASHIER", label: "Cashier" },
   { value: "MANAGEMENT", label: "Management" },
 ];
 

@@ -21,7 +21,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useServerAction } from "@/hooks/use-server-action";
-import { STAFF_ROLE_OPTIONS, staffStatusLabel } from "@/lib/staff";
+import { STAFF_ROLE_OPTIONS, staffRoleLabel, staffStatusLabel } from "@/lib/staff";
 import type { StaffDTO, StaffStatus } from "@/types/staff";
 
 const initials = (name: string) =>
@@ -75,6 +75,9 @@ function StaffRow({
           <p className="text-muted-foreground text-xs">
             {member.employeeCode} · {member.phone}
             {member.hasPin ? " · PIN set" : " · No PIN"}
+            {member.extraRoles.length > 0
+              ? ` · also ${member.extraRoles.map((r) => staffRoleLabel(r)).join(", ").toLowerCase()}`
+              : ""}
           </p>
         </div>
       </div>

@@ -11,6 +11,7 @@ export interface StaffWriteData {
   employeeCode: string;
   name: string;
   role: StaffRole;
+  extraRoles: StaffRole[];
   status: StaffStatus;
   phone: string;
   email: string | null;

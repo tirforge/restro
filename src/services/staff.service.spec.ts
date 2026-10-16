@@ -21,6 +21,7 @@ import {
   findStaffByEmployeeCode,
   findStaffById,
   reviveStaff,
+  updateStaff as updateStaffRepo,
   updateStaffPin,
 } from "@/repositories/staff.repository";
 import {
@@ -41,6 +42,7 @@ const makeStaff = (o: Record<string, unknown> = {}): Staff =>
     employeeCode: "E1",
     name: "Ramesh",
     role: "WAITER",
+  extraRoles: [],
     status: "ACTIVE",
     photoUrl: null,
     phone: "999",
@@ -68,6 +70,7 @@ const baseInput = {
   employeeCode: "E9",
   name: "New",
   role: "WAITER" as const,
+  extraRoles: [],
   status: "ACTIVE" as const,
   phone: "888",
   pin: "1234",
@@ -135,5 +138,21 @@ describe("updateStaff / resetPin", () => {
     await resetPin(ctx, { id: "st1", pin: "9999" });
 
     expect(updateStaffPin).toHaveBeenCalledWith("st1", "h:res_1:9999");
+  });
+
+  it("carries extraRoles through and drops the primary role", async () => {
+    vi.mocked(findStaffById).mockResolvedValue(makeStaff());
+    vi.mocked(updateStaffRepo).mockResolvedValue(makeStaff());
+
+    await updateStaff(ctx, {
+      ...baseInput,
+      id: "st1",
+      extraRoles: ["CASHIER", "WAITER"],
+    });
+
+    expect(updateStaffRepo).toHaveBeenCalledWith(
+      "st1",
+      expect.objectContaining({ extraRoles: ["CASHIER"] }),
+    );
   });
 });

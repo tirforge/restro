@@ -32,11 +32,13 @@ import {
   getSelfOrderShareInfo,
   getServiceOptions,
   getTaxProfile,
+  getUpiId,
   clearGeolocation,
   regenerateUsername,
   RESTAURANT_NOT_FOUND,
   setInvoiceFooterNote,
   setSelfOrderEnabled,
+  setUpiId,
   updateGeolocation,
   updateRestaurantProfile,
   updateTaxProfile,
@@ -342,9 +344,40 @@ describe("self-ordering flag", () => {
   it("persists the new flag", async () => {
     await setSelfOrderEnabled("res_1", true);
 
-    expect(updateRestaurant).toHaveBeenCalledWith("res_1", {
-      selfOrderEnabled: true,
+    expect(updateRestaurant).toHaveBeenCalledWith("res_1", {      selfOrderEnabled: true,
     });
+  });
+});
+
+describe("upi id", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("reads the VPA (empty when unset)", async () => {
+    vi.mocked(findRestaurantById).mockResolvedValue(
+      makeRestaurant({ upiId: null }),
+    );
+    expect(await getUpiId("res_1")).toBe("");
+
+    vi.mocked(findRestaurantById).mockResolvedValue(
+      makeRestaurant({ upiId: "shop@okhdfc" }),
+    );
+    expect(await getUpiId("res_1")).toBe("shop@okhdfc");
+  });
+
+  it("throws when the restaurant is missing", async () => {
+    vi.mocked(findRestaurantById).mockResolvedValue(null);
+
+    await expect(getUpiId("res_1")).rejects.toThrow(RESTAURANT_NOT_FOUND);
+  });
+
+  it("persists the VPA, clearing on empty", async () => {
+    await setUpiId("res_1", "shop@okhdfc");
+    expect(updateRestaurant).toHaveBeenCalledWith("res_1", {
+      upiId: "shop@okhdfc",
+    });
+
+    await setUpiId("res_1", "");
+    expect(updateRestaurant).toHaveBeenCalledWith("res_1", { upiId: null });
   });
 });
 

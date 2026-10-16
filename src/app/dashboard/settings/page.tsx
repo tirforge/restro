@@ -13,6 +13,7 @@ import { LocationMapCard } from "@/components/settings/location-map-card"
 import { ProfileHeader } from "@/components/settings/profile-header"
 import { RestaurantProfileForm } from "@/components/settings/restaurant-profile-form"
 import { SelfOrderCard } from "@/components/settings/self-order-card"
+import { UpiIdCard } from "@/components/settings/upi-id-card"
 import { SignInPinCard } from "@/components/settings/sign-in-pin-card"
 import { TaxSettingsForm } from "@/components/settings/tax-settings-form"
 import { UsernameCard } from "@/components/settings/username-card"
@@ -38,6 +39,7 @@ import {
   getRestaurantProfile,
   getSelfOrderEnabled,
   getTaxProfile,
+  getUpiId,
 } from "@/services/restaurant-settings.service"
 import { getPinStatus } from "@/services/pin-auth.service"
 
@@ -77,6 +79,7 @@ export default async function SettingsPage() {
   const pinStatus = await getPinStatus(ctx.userId)
   const selfOrderEnabled = await getSelfOrderEnabled(ctx.restaurantId)
   const invoiceFooter = await getInvoiceFooterNote(ctx.restaurantId)
+  const upiId = await getUpiId(ctx.restaurantId)
 
   const essentials: (string | null)[] = [
     profile.name,
@@ -161,6 +164,7 @@ export default async function SettingsPage() {
             className="flex flex-col gap-6"
           >
             <TaxSettingsForm profile={taxProfile} />
+            <UpiIdCard initialUpiId={upiId} />
             <InvoiceFooterCard note={invoiceFooter} />
           </TabsContent>
 

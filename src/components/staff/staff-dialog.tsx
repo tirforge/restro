@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -67,6 +67,10 @@ export function StaffDialog({
     notes: staff?.notes ?? "",
   });
   const [role, setRole] = useState<StaffRole>(staff?.role ?? "WAITER");
+  // Extra stations for dual-role shifts (primary role excluded below).
+  const [extraRoles, setExtraRoles] = useState<readonly StaffRole[]>(
+    staff?.extraRoles ?? [],
+  );
   const [status, setStatus] = useState<StaffStatus>(staff?.status ?? "ACTIVE");
   const [gender, setGender] = useState<Gender | "">(staff?.gender ?? "");
   const [employmentType, setEmploymentType] = useState<EmploymentType | "">(
@@ -94,6 +98,7 @@ export function StaffDialog({
       employeeCode: form.employeeCode.trim(),
       name: form.name.trim(),
       role,
+      extraRoles: extraRoles.filter((r) => r !== role),
       status,
       phone: form.phone.trim(),
       email: trimmed(form.email),
@@ -176,6 +181,37 @@ export function StaffDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </Field>
+            <Field className="col-span-2">
+              <FieldLabel>Also works as (extra stations)</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {STAFF_ROLE_OPTIONS.filter((o) => o.value !== role).map((o) => {
+                  const on = extraRoles.includes(o.value);
+                  return (
+                    <Button
+                      key={o.value}
+                      type="button"
+                      size="sm"
+                      variant={on ? "default" : "outline"}
+                      aria-pressed={on}
+                      onClick={() =>
+                        setExtraRoles((prev) =>
+                          prev.includes(o.value)
+                            ? prev.filter((r) => r !== o.value)
+                            : [...prev, o.value],
+                        )
+                      }
+                    >
+                      {on ? "✓ " : ""}
+                      {o.label}
+                    </Button>
+                  );
+                })}
+              </div>
+              <FieldDescription>
+                One login covers every selected station — for short-staffed
+                shifts.
+              </FieldDescription>
             </Field>
             <Field>
               <FieldLabel htmlFor="st-status">Status</FieldLabel>

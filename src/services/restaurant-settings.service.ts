@@ -94,6 +94,22 @@ export interface SelfOrderShareInfo {
   readonly enabled: boolean;
 }
 
+/** The UPI VPA used for the cashier QR ("" when unset). */
+export const getUpiId = async (restaurantId: string): Promise<string> => {
+  const restaurant = await findRestaurantById(restaurantId);
+  if (!restaurant || restaurant.deletedAt) {
+    throw new Error(RESTAURANT_NOT_FOUND);
+  }
+  return restaurant.upiId ?? "";
+};
+
+export const setUpiId = async (
+  restaurantId: string,
+  upiId: string,
+): Promise<void> => {
+  await updateRestaurant(restaurantId, { upiId: upiId || null });
+};
+
 /** The custom invoice footer note (empty string when unset). */
 export const getInvoiceFooterNote = async (
   restaurantId: string,

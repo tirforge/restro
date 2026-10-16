@@ -8,6 +8,8 @@ export interface StaffDTO {
   readonly employeeCode: string;
   readonly name: string;
   readonly role: StaffRole;
+  /** Extra stations for dual-role shifts (effective = [role, ...extraRoles]). */
+  readonly extraRoles: readonly StaffRole[];
   readonly status: StaffStatus;
   readonly photoUrl: string | null;
   readonly phone: string;
