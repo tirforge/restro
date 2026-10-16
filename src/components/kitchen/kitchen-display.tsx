@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { LogOutIcon } from "lucide-react";
@@ -228,6 +229,16 @@ export function KitchenDisplay({
           </Button>
         </div>
       </div>
+
+      <Button
+        size="lg"
+        variant="secondary"
+        className="h-14 w-full text-base"
+        nativeButton={false}
+        render={<Link href={`/u/${username}/billing`} />}
+      >
+        🧾 Cashier — collect & clear bills
+      </Button>
 
       <h2 className="text-muted-foreground text-sm font-medium">
         Tickets {tickets.length > 0 ? `(${tickets.length})` : ""}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 
@@ -144,6 +144,20 @@ export function CashierBilling({
     },
   });
 
+  // Keep the latest refresh closure for the polling interval below.
+  const refreshRef = useRef(refresh);
+  useEffect(() => {
+    refreshRef.current = refresh;
+  });
+
+  // Poll for new/changed bills so the cashier always sees live data.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!document.hidden) void refreshRef.current.execute({});
+    }, 10000);
+    return () => clearInterval(id);
+  }, []);
+
   const settle = useServerAction(staffSettleAction, {
     onSuccess: () => {
       toast.success("Bill settled — cleared ✓");
@@ -186,7 +200,11 @@ export function CashierBilling({
         <div>
           <h1 className="text-xl font-bold">Cashier</h1>
           <p className="text-muted-foreground text-sm">
-            {restaurantName} · {staffName}
+            {restaurantName} · {staffName} ·{" "}
+            <span className="inline-flex items-center gap-1 font-medium text-emerald-700">
+              <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" />
+              Live
+            </span>
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => refresh.execute({})}>
