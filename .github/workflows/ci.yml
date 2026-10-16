@@ -64,7 +64,7 @@ jobs:
 
       - name: Smoke — OTP mode (table → login gate → no menu yet)
         run: |
-          pkill -f "next-server" || true
+          pkill -f "[n]ext-server" || true
           (npm start -- --port 3000 > /tmp/smoke-otp.log 2>&1 & echo $! > /tmp/smoke.pid)
           for i in $(seq 1 60); do
             curl -sf http://localhost:3000/ > /dev/null && break
@@ -82,7 +82,7 @@ jobs:
         env:
           GUEST_OTP_DISABLED: "true"
         run: |
-          pkill -f "next-server" || true
+          pkill -f "[n]ext-server" || true
           (npm start -- --port 3000 > /tmp/smoke-walkin.log 2>&1 & echo $! > /tmp/smoke.pid)
           for i in $(seq 1 60); do
             curl -sf http://localhost:3000/ > /dev/null && break
@@ -96,4 +96,4 @@ jobs:
 
       - name: Stop smoke server
         if: always()
-        run: pkill -f "next-server" || true
+        run: pkill -f "[n]ext-server" || true
