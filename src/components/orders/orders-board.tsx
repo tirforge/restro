@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { SelfOrderBadge } from "@/components/shared/self-order-badge";
 import { SoundToggle } from "@/components/shared/sound-toggle";
 import { useAnnouncer } from "@/hooks/use-announcer";
+import { useOrderEvents } from "@/hooks/use-order-events";
 import {
   alertSignatureMap,
   newOrderAlerts,
@@ -78,9 +79,11 @@ export function OrdersBoard({
 
   const groups = useMemo(() => groupByTable(open), [open]);
 
-  // Poll every 10s so new orders surface hands-free.
+  // Instant updates via realtime; slow poll as backup so new orders
+  // surface hands-free.
+  useOrderEvents(() => router.refresh());
   useEffect(() => {
-    const id = setInterval(() => router.refresh(), 2000);
+    const id = setInterval(() => router.refresh(), 30000);
     return () => clearInterval(id);
   }, [router]);
 

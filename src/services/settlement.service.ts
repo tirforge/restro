@@ -1,4 +1,5 @@
 import type { SettleInput, SettleTableInput } from "@/lib/validators/order";
+import { publishOrderEvent } from "@/lib/ably";
 import { settleManyOrders, settleOrder } from "@/repositories/order.repository";
 import { computeBill } from "@/services/billing";
 import {
@@ -50,7 +51,11 @@ export const settle = async (
       receivedById: ctx.userId,
     })),
   });
-  return mapOrder(settled);
+  const done = mapOrder(settled);
+  void publishOrderEvent(ctx.restaurantId, "order.settled", {
+    orderId: done.id,
+  });
+  return done;
 };
 
 const round2 = (n: number): number =>

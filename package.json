@@ -2,7 +2,7 @@
   "name": "ElitaleRestro",
   "version": "0.1.0",
   "private": true,
-  "description": "ElitaleRestro \u2014 an open-source restaurant management platform (POS, KDS, orders, tables, inventory, billing).",
+  "description": "ElitaleRestro — an open-source restaurant management platform (POS, KDS, orders, tables, inventory, billing).",
   "license": "AGPL-3.0-only",
   "author": {
     "name": "Dharmendra Shah",
@@ -34,6 +34,7 @@
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@tanstack/react-table": "^8.21.3",
+    "ably": "^2.29.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",

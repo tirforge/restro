@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { orderRunningTotal } from "@/components/pos/types";
 import { useServerAction } from "@/hooks/use-server-action";
+import { useOrderEvents } from "@/hooks/use-order-events";
 import { buildUpiUri } from "@/lib/upi";
 import type { OrderDTO } from "@/types/order";
 import type { StaffRole } from "@/types/staff";
@@ -150,11 +151,16 @@ export function CashierBilling({
     refreshRef.current = refresh;
   });
 
-  // Poll for new/changed bills so the cashier always sees live data.
+  // Instant updates via realtime; slow poll as backup.
+  const doRefresh = useCallback(
+    () => void refreshRef.current.execute({}),
+    [],
+  );
+  useOrderEvents(doRefresh);
   useEffect(() => {
     const id = setInterval(() => {
       if (!document.hidden) void refreshRef.current.execute({});
-    }, 2000);
+    }, 30000);
     return () => clearInterval(id);
   }, []);
 

@@ -3,6 +3,7 @@ import {
   deriveKitchenStatus,
   kitchenAdvanceLabel,
 } from "@/lib/kitchen";
+import { publishOrderEvent } from "@/lib/ably";
 import {
   advanceLineStates,
   findOrdersByRestaurant,
@@ -97,6 +98,7 @@ export const advanceTicket = async (
     hasFired ? "FIRED" : "PREPARING",
     hasFired ? "PREPARING" : "PREPARED",
   );
+  void publishOrderEvent(restaurantId, "order.updated", { orderId });
 };
 
 /** Waiter clears a ready ticket by marking its prepared lines served. */
@@ -109,4 +111,5 @@ export const markPickedUp = async (
     throw new Error(ORDER_NOT_OPEN);
   }
   await advanceLineStates(orderId, "PREPARED", "SERVED");
+  void publishOrderEvent(restaurantId, "order.updated", { orderId });
 };

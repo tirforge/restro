@@ -34,6 +34,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useServerAction } from "@/hooks/use-server-action";
+import { useOrderEvents } from "@/hooks/use-order-events";
 import { computeBill } from "@/services/billing";
 import { formatTime, maskPhone } from "@/lib/format";
 import {
@@ -164,15 +165,21 @@ export function GuestOrderPage({
     }
   }, []);
 
-  // Poll the guest's own orders every 10s so status (Preparing → Ready → Paid)
-  // stays live while they watch.
+  const refreshOrdersRef = useRef(refreshOrders);
+  useEffect(() => {
+    refreshOrdersRef.current = refreshOrders;
+  });
+
+  // Instant updates via realtime; slow poll as backup so status
+  // (Preparing → Ready → Paid) stays live while they watch.
+  useOrderEvents(() => void refreshOrdersRef.current());
   useEffect(() => {
     if (!verified) {
       return;
     }
     const id = setInterval(() => {
       void refreshOrders();
-    }, 2000);
+    }, 30000);
     return () => clearInterval(id);
   }, [verified, refreshOrders]);
 

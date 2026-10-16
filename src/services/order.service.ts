@@ -1,4 +1,5 @@
 import type { OrderStatus } from "@/generated/prisma/client";
+import { publishOrderEvent } from "@/lib/ably";
 import type {
   AddItemsInput,
   CreateOrderInput,
@@ -223,7 +224,12 @@ export const createOrder = async (
     input.items.map((l) => ({ menuItemId: l.menuItemId, quantity: l.quantity })),
     order.id,
   ).catch(() => undefined);
-  return mapOrder(order);
+  const created = mapOrder(order);
+  void publishOrderEvent(ctx.restaurantId, "order.created", {
+    orderId: created.id,
+    orderNumber: created.orderNumber,
+  });
+  return created;
 };
 
 export const addItems = async (
@@ -259,7 +265,11 @@ export const fireOrder = async (
   if (order.status !== "OPEN") {
     throw new Error(ORDER_NOT_OPEN);
   }
-  return mapOrder(await fireUnsentItems(orderId));
+  const fired = mapOrder(await fireUnsentItems(orderId));
+  void publishOrderEvent(ctx.restaurantId, "order.updated", {
+    orderId: fired.id,
+  });
+  return fired;
 };
 
 const assertLineOnOrder = (order: OrderWithRelations, itemId: string): void => {

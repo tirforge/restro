@@ -13,6 +13,7 @@ import { SelfOrderBadge } from "@/components/shared/self-order-badge";
 import { SoundToggle } from "@/components/shared/sound-toggle";
 import { Button } from "@/components/ui/button";
 import { useAnnouncer } from "@/hooks/use-announcer";
+import { useOrderEvents } from "@/hooks/use-order-events";
 import { useServerAction } from "@/hooks/use-server-action";
 import {
   alertSignatureMap,
@@ -166,16 +167,16 @@ export function KitchenDisplay({
   const [now, setNow] = useState(() => Date.now());
   const seenRef = useRef<Map<string, number> | null>(null);
 
-  // Live timers + lightweight polling so new/updated tickets appear hands-free.
+  // Instant updates via realtime; clock ticks locally, slow poll as backup.
+  useOrderEvents(() => router.refresh());
   useEffect(() => {
     const raf = requestAnimationFrame(() => setNow(Date.now()));
-    const id = setInterval(() => {
-      setNow(Date.now());
-      router.refresh();
-    }, 2000);
+    const clock = setInterval(() => setNow(Date.now()), 1000);
+    const poll = setInterval(() => router.refresh(), 30000);
     return () => {
       cancelAnimationFrame(raf);
-      clearInterval(id);
+      clearInterval(clock);
+      clearInterval(poll);
     };
   }, [router]);
 

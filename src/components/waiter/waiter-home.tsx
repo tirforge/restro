@@ -15,6 +15,7 @@ import { SelfOrderBadge } from "@/components/shared/self-order-badge";
 import { SoundToggle } from "@/components/shared/sound-toggle";
 import { Button } from "@/components/ui/button";
 import { useAnnouncer } from "@/hooks/use-announcer";
+import { useOrderEvents } from "@/hooks/use-order-events";
 import { useServerAction } from "@/hooks/use-server-action";
 import { newIds, orderReadyPhrase } from "@/lib/announce";
 import { deriveKitchenStatus } from "@/lib/kitchen";
@@ -70,9 +71,11 @@ export function WaiterHome({
     onError: (m) => toast.error(toMessage(m)),
   });
 
-  // Auto-refresh so kitchen status (Preparing / Ready) stays current hands-free.
+  // Instant updates via realtime; slow poll as backup so kitchen status
+  // (Preparing / Ready) stays current hands-free.
+  useOrderEvents(() => router.refresh());
   useEffect(() => {
-    const id = setInterval(() => router.refresh(), 2000);
+    const id = setInterval(() => router.refresh(), 30000);
     return () => clearInterval(id);
   }, [router]);
 
