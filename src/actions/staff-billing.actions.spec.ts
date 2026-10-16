@@ -18,6 +18,7 @@ const waiterCtx = {
   staffId: "st1",
   restaurantId: "res_1",
   role: "WAITER" as const,
+  roles: ["WAITER" as const],
   name: "Ramesh",
   employeeCode: "E1",
 };
@@ -47,6 +48,7 @@ describe("staffSettleAction", () => {
     vi.mocked(getStaffContextOrNull).mockResolvedValue({
       ...waiterCtx,
       role: "KITCHEN" as const,
+  roles: ["KITCHEN" as const],
     });
 
     const result = await staffSettleAction(settleInput);

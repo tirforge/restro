@@ -20,6 +20,8 @@ const KEYS = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
 const ROLE_LABEL: Record<string, string> = {
   WAITER: "Waiter",
   KITCHEN: "Kitchen",
+  CASHIER: "Cashier",
+  MANAGEMENT: "Manager",
 };
 
 const initials = (name: string) =>

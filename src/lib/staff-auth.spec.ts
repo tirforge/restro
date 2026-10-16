@@ -45,12 +45,24 @@ describe("getStaffContextOrNull", () => {
       staffId: "st1",
       restaurantId: "res_1",
       role: "WAITER",
+      roles: ["WAITER"],
       name: "Ramesh",
       employeeCode: "E1",
     });
   });
 
-  it("locks out a deactivated / deleted / role-changed staff member instantly", async () => {
+  it("resolves dual roles from primary + extraRoles", async () => {
+    vi.mocked(getStaffSession).mockResolvedValue(session);
+    vi.mocked(findStaffById).mockResolvedValue(
+      makeStaff({ role: "WAITER", extraRoles: ["CASHIER"] }),
+    );
+
+    expect(await getStaffContextOrNull()).toEqual(
+      expect.objectContaining({ roles: ["WAITER", "CASHIER"] }),
+    );
+  });
+
+  it("locks out a deactivated / deleted staff member instantly", async () => {
     vi.mocked(getStaffSession).mockResolvedValue(session);
 
     vi.mocked(findStaffById).mockResolvedValueOnce(
@@ -60,11 +72,6 @@ describe("getStaffContextOrNull", () => {
 
     vi.mocked(findStaffById).mockResolvedValueOnce(
       makeStaff({ deletedAt: new Date() }),
-    );
-    expect(await getStaffContextOrNull()).toBeNull();
-
-    vi.mocked(findStaffById).mockResolvedValueOnce(
-      makeStaff({ role: "MANAGEMENT" }),
     );
     expect(await getStaffContextOrNull()).toBeNull();
   });

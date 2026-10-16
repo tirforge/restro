@@ -21,7 +21,14 @@ export const staffOpenBillsAction = withStaffValidation(
 export const staffSettleAction = withStaffValidation(
   settleSchema,
   async (data, ctx): Promise<OrderDTO> => {
-    if (ctx.role !== "WAITER" && ctx.role !== "MANAGEMENT") {
+    if (
+      ctx.role !== "WAITER" &&
+      ctx.role !== "CASHIER" &&
+      ctx.role !== "MANAGEMENT" &&
+      !ctx.roles.includes("CASHIER") &&
+      !ctx.roles.includes("WAITER") &&
+      !ctx.roles.includes("MANAGEMENT")
+    ) {
       throw new Error("STAFF_FORBIDDEN");
     }
     return settle(

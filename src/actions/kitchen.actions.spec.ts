@@ -19,6 +19,7 @@ const kitchenCtx = {
   staffId: "st_k",
   restaurantId: "res_1",
   role: "KITCHEN" as const,
+  roles: ["KITCHEN" as const],
   name: "Suresh",
   employeeCode: "K1",
 };
@@ -27,6 +28,7 @@ const waiterCtx = {
   staffId: "st_w",
   restaurantId: "res_1",
   role: "WAITER" as const,
+  roles: ["WAITER" as const],
   name: "Ramesh",
   employeeCode: "W1",
 };

@@ -50,16 +50,13 @@ export const getStaffLoginRestaurant = async (
   };
 };
 
-/** Active waiter/kitchen staff who can sign in, for the login picker. */
+/** Active staff who can sign in, for the login picker. */
 export const listLoginStaff = async (
   restaurantId: string,
 ): Promise<StaffLoginOption[]> => {
   const staff = await findStaffByRestaurant(restaurantId);
   return staff
-    .filter(
-      (s) =>
-        s.status === "ACTIVE" && (s.role === "WAITER" || s.role === "KITCHEN"),
-    )
+    .filter((s) => s.status === "ACTIVE")
     .map((s) => ({
       employeeCode: s.employeeCode,
       name: s.name,
@@ -80,9 +77,6 @@ export const verifyStaffLogin = async (
 ): Promise<StaffLoginResult> => {
   const staff = await findStaffByEmployeeCode(restaurantId, employeeCode);
   if (!staff || staff.deletedAt || staff.status !== "ACTIVE") {
-    throw new Error(STAFF_LOGIN_INVALID);
-  }
-  if (staff.role !== "WAITER" && staff.role !== "KITCHEN") {
     throw new Error(STAFF_LOGIN_INVALID);
   }
   if (staff.loginLockedUntil && staff.loginLockedUntil.getTime() > Date.now()) {

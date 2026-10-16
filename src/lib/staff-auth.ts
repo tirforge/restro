@@ -5,7 +5,10 @@ import type { StaffRole } from "@/types/staff";
 export interface StaffContext {
   readonly staffId: string;
   readonly restaurantId: string;
+  /** Primary role (identity/badge). */
   readonly role: StaffRole;
+  /** Effective roles: primary + extraRoles (dual-job shifts). */
+  readonly roles: StaffRole[];
   readonly name: string;
   readonly employeeCode: string;
 }
@@ -25,15 +28,16 @@ export const getStaffContextOrNull = async (): Promise<StaffContext | null> => {
     !staff ||
     staff.deletedAt ||
     staff.status !== "ACTIVE" ||
-    (staff.role !== "WAITER" && staff.role !== "KITCHEN") ||
     staff.restaurantId !== session.restaurantId
   ) {
     return null;
   }
+  const roles = [staff.role, ...(staff.extraRoles ?? [])];
   return {
     staffId: staff.id,
     restaurantId: staff.restaurantId,
     role: staff.role,
+    roles,
     name: staff.name,
     employeeCode: staff.employeeCode,
   };

@@ -615,6 +615,7 @@ model RecipeComponent {
 enum StaffRole {
   WAITER
   KITCHEN
+  CASHIER
   MANAGEMENT
 }
 
@@ -644,6 +645,9 @@ model Staff {
   employeeCode          String
   name                  String
   role                  StaffRole
+  // Extra stations this person can also work (understaffed shifts) —
+  // effective stations = [role, ...extraRoles].
+  extraRoles            StaffRole[]       @default([])
   status                StaffStatus     @default(ACTIVE)
   photoUrl              String?
   phone                 String

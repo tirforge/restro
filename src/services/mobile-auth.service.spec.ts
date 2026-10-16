@@ -130,6 +130,7 @@ const makeStaff = (overrides: Partial<Staff> = {}): Staff => ({
   emergencyContactPhone: null,
   notes: null,
   pinHash: hashStaffPin("482913", RESTAURANT_ID),
+  extraRoles: [],
   loginFailedAttempts: 0,
   loginLockedUntil: null,
   createdAt: new Date(),

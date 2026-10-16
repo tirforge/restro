@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { CashierBilling } from "@/components/cashier/cashier-billing";
 import { getStaffContextOrNull } from "@/lib/staff-auth";
+import { resolveStationsFor } from "@/lib/staff-stations";
 import { listOrders } from "@/services/order.service";
 import { getStaffLoginRestaurant } from "@/services/staff-auth.service";
 import { findRestaurantByUsername } from "@/repositories/restaurant.repository";
@@ -25,6 +26,9 @@ export default async function CashierBillingPage({
   const restaurant = await getStaffLoginRestaurant(username);
   if (!restaurant || restaurant.id !== ctx.restaurantId) {
     redirect(`/u/${username}/login`);
+  }
+  if (!resolveStationsFor(ctx.roles).includes("billing")) {
+    redirect(`/u/${username}`);
   }
 
   const full = await findRestaurantByUsername(username);

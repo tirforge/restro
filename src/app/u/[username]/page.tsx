@@ -1,12 +1,25 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { KitchenDisplay } from "@/components/kitchen/kitchen-display";
-import { WaiterHome } from "@/components/waiter/waiter-home";
+import { Button } from "@/components/ui/button";
 import { getStaffContextOrNull } from "@/lib/staff-auth";
-import { listKitchenTickets } from "@/services/kitchen.service";
-import { listOrders } from "@/services/order.service";
+import {
+  STATION_HREF,
+  STATION_LABEL,
+  resolveStationsFor,
+} from "@/lib/staff-stations";
 import { getStaffLoginRestaurant } from "@/services/staff-auth.service";
 
+const STATION_ICON: Record<string, string> = {
+  orders: "📝",
+  kitchen: "👨‍🍳",
+  billing: "🧾",
+};
+
+/**
+ * Station hub — after PIN login, staff pick which job to work right now.
+ * Understaffed shifts: one login covers every station their roles unlock.
+ */
 export default async function StaffHomePage({
   params,
 }: {
@@ -24,28 +37,39 @@ export default async function StaffHomePage({
     redirect(`/u/${username}/login`);
   }
 
-  if (ctx.role === "WAITER") {
-    const openOrders = await listOrders(ctx.restaurantId, ["OPEN"]);
-    return (
-      <main className="min-h-svh">
-        <WaiterHome
-          username={restaurant.username}
-          restaurantName={restaurant.name}
-          staffName={ctx.name}
-          openOrders={openOrders}
-        />
-      </main>
-    );
-  }
+  const stations = resolveStationsFor(ctx.roles);
+  const hrefs = STATION_HREF(restaurant.username);
 
   return (
-    <main className="min-h-svh">
-      <KitchenDisplay
-        username={restaurant.username}
-        restaurantName={restaurant.name}
-        staffName={ctx.name}
-        tickets={await listKitchenTickets(ctx.restaurantId)}
-      />
+    <main className="mx-auto flex min-h-svh w-full max-w-md flex-col gap-4 p-4">
+      <div className="flex flex-col items-center gap-1 pt-8 text-center">
+        <p className="text-muted-foreground text-sm">{restaurant.name}</p>
+        <h1 className="text-xl font-bold">Hi, {ctx.name}</h1>
+        <p className="text-muted-foreground text-sm">
+          {ctx.role.charAt(0) + ctx.role.slice(1).toLowerCase()}
+          {ctx.roles.length > 1 ? " · also on multiple stations" : ""} — pick
+          your station
+        </p>
+      </div>
+      <div className="flex flex-col gap-3">
+        {stations.map((s) => (
+          <Button
+            key={s}
+            size="lg"
+            className="h-16 w-full text-base"
+            nativeButton={false}
+            render={<Link href={hrefs[s]} />}
+          >
+            <span className="text-xl">{STATION_ICON[s]}</span>
+            {STATION_LABEL[s]}
+          </Button>
+        ))}
+        {stations.length === 0 ? (
+          <p className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-sm">
+            No stations assigned — ask your manager.
+          </p>
+        ) : null}
+      </div>
     </main>
   );
 }

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { OrderBuilder } from "@/components/waiter/order-builder";
 import { getStaffContextOrNull } from "@/lib/staff-auth";
+import { resolveStationsFor } from "@/lib/staff-stations";
 import { getMenu } from "@/services/menu-item.service";
 import { listOrders } from "@/services/order.service";
 import { getServiceOptions } from "@/services/restaurant-settings.service";
@@ -15,8 +16,11 @@ export default async function NewOrderPage({
 }) {
   const { username } = await params;
   const ctx = await getStaffContextOrNull();
-  if (!ctx || ctx.role !== "WAITER") {
+  if (!ctx) {
     redirect(`/u/${username}/login`);
+  }
+  if (!resolveStationsFor(ctx.roles).includes("orders")) {
+    redirect(`/u/${username}`);
   }
   const restaurant = await getStaffLoginRestaurant(username);
   if (!restaurant || restaurant.id !== ctx.restaurantId) {

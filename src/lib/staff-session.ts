@@ -58,7 +58,10 @@ export const getStaffSession = async (): Promise<StaffSessionPayload | null> => 
     if (
       typeof sub === "string" &&
       typeof restaurantId === "string" &&
-      (role === "WAITER" || role === "KITCHEN")
+      (role === "WAITER" ||
+        role === "KITCHEN" ||
+        role === "CASHIER" ||
+        role === "MANAGEMENT")
     ) {
       return { staffId: sub, restaurantId, role };
     }

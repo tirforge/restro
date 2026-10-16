@@ -11,6 +11,7 @@ const ROLES = [
   "SUPER_ADMIN",
   "WAITER",
   "KITCHEN",
+  "CASHIER",
   "MANAGEMENT",
 ] as const;
 export type MobileTokenRole = (typeof ROLES)[number];
