@@ -12,7 +12,7 @@ import {
 function GuestNotice({ title, message }: { title: string; message: string }) {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-center gap-3 p-6 text-center">
-      <h1 className="text-lg font-semibold">{title}</h1>
+      <h1 className="text-xl font-bold">{title}</h1>
       <p className="text-muted-foreground text-sm">{message}</p>
     </main>
   );

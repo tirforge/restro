@@ -342,6 +342,68 @@ export function GuestOrderPage({
     );
   }
 
+  // Table first, login second, menu last: guests verify their phone before
+  // they can browse and order. (verify.onSuccess calls submitOrder, which
+  // safely no-ops on the empty cart at this stage.)
+  if (!verified) {
+    return (
+      <div className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
+        <div className="bg-primary/10 text-primary flex size-14 items-center justify-center rounded-2xl text-2xl">
+          🪑
+        </div>
+        <div>
+          <h1 className="text-xl font-bold">{restaurantName}</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Ordering for <span className="font-medium">{tableLabel}</span>{" "}
+            <button
+              type="button"
+              className="underline"
+              onClick={() => router.push(`/order/${username}`)}
+            >
+              Change
+            </button>
+          </p>
+        </div>
+        <div className="flex w-full max-w-xs flex-col gap-3 rounded-2xl border p-4 text-left">
+          <div>
+            <p className="font-semibold">Verify your phone</p>
+            <p className="text-muted-foreground text-sm">
+              We&apos;ll text you a one-time code — then the menu opens.
+            </p>
+          </div>
+          <PhoneInput onChange={setPhone} disabled={otpSent || busy} />
+          {otpSent ? (
+            <Input
+              value={code}
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              placeholder="6-digit code"
+              inputMode="numeric"
+              maxLength={6}
+              className="h-11 text-center text-lg tracking-widest"
+            />
+          ) : null}
+          {otpSent ? (
+            <Button
+              className="h-12 w-full text-base"
+              disabled={!codeValid || busy}
+              onClick={() => verify.execute({ username, tableId, phone, code })}
+            >
+              {busy ? "Verifying…" : "Verify & see menu"}
+            </Button>
+          ) : (
+            <Button
+              className="h-12 w-full text-base"
+              disabled={!phoneValid || sendCode.isPending}
+              onClick={() => sendCode.execute({ username, tableId, phone })}
+            >
+              {sendCode.isPending ? "Sending…" : "Send code"}
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col p-4 pb-28">
       <div className="mb-3 flex items-start justify-between gap-2">
