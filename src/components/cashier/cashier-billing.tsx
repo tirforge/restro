@@ -127,7 +127,6 @@ export function CashierBilling({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [mode, setMode] = useState<"CASH" | "UPI">("CASH");
   const [tendered, setTendered] = useState("");
-  const [upiRef, setUpiRef] = useState("");
 
   const selected = orders.find((o) => o.id === selectedId) ?? null;
   const total = selected ? orderRunningTotal(selected) : 0;
@@ -168,7 +167,6 @@ export function CashierBilling({
     onSuccess: () => {
       toast.success("Bill settled — cleared ✓");
       setTendered("");
-      setUpiRef("");
       setSelectedId(null);
       void refresh.execute({});
     },
@@ -193,7 +191,7 @@ export function CashierBilling({
           {
             mode: "UPI",
             amount: total,
-            reference: upiRef.trim() || `ORD-${selected.orderNumber}`,
+            reference: `ORD-${selected.orderNumber}`,
           },
         ],
       });
@@ -242,7 +240,6 @@ export function CashierBilling({
                 onClick={() => {
                   setSelectedId(o.id);
                   setTendered("");
-                  setUpiRef("");
                   setMode("CASH");
                 }}
                 className={`flex items-center justify-between gap-2 rounded-xl border p-3 text-left transition-colors hover:bg-accent ${
@@ -329,12 +326,6 @@ export function CashierBilling({
                     orderNumber={selected.orderNumber}
                     amount={total}
                   />
-                  <Input
-                    value={upiRef}
-                    onChange={(e) => setUpiRef(e.target.value.slice(0, 60))}
-                    placeholder="UPI ref / UTR (optional)"
-                    className="h-11"
-                  />
                 </div>
               ) : (
                 <p className="rounded-xl border border-dashed p-4 text-center text-sm text-muted-foreground">
@@ -353,7 +344,9 @@ export function CashierBilling({
               >
                 {settle.isPending
                   ? "Settling…"
-                  : `Confirm ${mode === "CASH" ? "cash" : "UPI"} payment · ₹${total.toFixed(0)}`}
+                  : mode === "CASH"
+                    ? `Confirm cash payment · ₹${total.toFixed(0)}`
+                    : `Mark UPI payment successful ✓ · ₹${total.toFixed(0)}`}
               </Button>
               <a
                 className="text-center text-xs text-muted-foreground underline"
