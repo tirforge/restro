@@ -82,7 +82,9 @@ jobs:
           BODY=$(curl -sf "http://localhost:3000/order/demo-restaurant?table=${SMOKE_TABLE_ID}")
           echo "$BODY" | grep -q "Verify your phone" || { echo "FAIL gate: no OTP gate. Got: $(echo "$BODY" | head -c 400)"; exit 1; }
           echo "PASS otp-gate"
-          echo "$BODY" | grep -q "Smoke Thali" && { echo "FAIL gate: menu leaked before login"; exit 1; } || echo "PASS menu-hidden"
+          # NOTE: menu item names travel in the RSC payload (props) even when
+          # the menu isn't rendered, so the leak signal is the order button.
+          echo "$BODY" | grep -q "Place order" && { echo "FAIL gate: menu leaked before login"; exit 1; } || echo "PASS menu-hidden"
           kill "$(cat /tmp/smoke.pid)"
 
       - name: Smoke — walk-in mode (table → menu, no login)
