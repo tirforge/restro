@@ -371,7 +371,7 @@ export function GuestOrderPage({
               We&apos;ll text you a one-time code — then the menu opens.
             </p>
           </div>
-          <PhoneInput onChange={setPhone} disabled={otpSent || busy} />
+          <PhoneInput onChange={setPhone} disabled={otpSent || busy} defaultCountry="IN" />
           {otpSent ? (
             <Input
               value={code}
@@ -600,7 +600,7 @@ export function GuestOrderPage({
                 className="h-11"
                 disabled={busy}
               />
-              <PhoneInput onChange={setPhone} disabled={otpSent || busy} />
+              <PhoneInput onChange={setPhone} disabled={otpSent || busy} defaultCountry="IN" />
               {otpSent ? (
                 <Input
                   value={code}
