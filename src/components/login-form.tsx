@@ -129,6 +129,7 @@ export function LoginForm({
               <FieldLabel htmlFor="phone">Phone number</FieldLabel>
               <PhoneInput
                 id="phone"
+                defaultCountry="IN"
                 onChange={(value) => {
                   setPhone(value)
                   if (error) {
