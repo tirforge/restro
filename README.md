@@ -54,6 +54,14 @@ A deployed demo instance is available for testing:
 
 - Menu: Butter Chicken (₹280), Masala Dosa (₹120), Veg Biryani (₹180) under the **Mains** category
 
+## 🔑 Demo credentials (testing only)
+
+| Who | Login |
+|---|---|
+| **ADMIN** | phone `+917597365803` → PIN `1234` (or OTP code `123456`) |
+| **STAFF** (`/u/demo-restaurant/login` → tap name → PIN pad) | Arjun `1111` · Priya `2222` · Suresh `3333` · Divya `4444` |
+| **GUEST** (`/order/demo-restaurant`, no login) | pick table → add items → name → any phone → code `123456` |
+
 ## Getting started
 
 ```bash
