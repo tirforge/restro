@@ -24,6 +24,36 @@ Built with a strict layered architecture (**UI → Server Actions → Services �
 - **Dashboard** — live day + month analytics (sales, AOV, payment mix, open orders, daily trend), auto-refresh.
 - **Staff** — role-based staff with PIN login for waiter/kitchen; manager phone-OTP / PIN login.
 
+## Live demo
+
+A deployed demo instance is available for testing:
+
+**https://restro-fxyx.vercel.app/**
+
+| What | Where |
+|---|---|
+| App home | https://restro-fxyx.vercel.app/ |
+| Guest self-ordering (table T1) | https://restro-fxyx.vercel.app/order/demo-restaurant |
+| Staff login (waiter/kitchen, PIN) | https://restro-fxyx.vercel.app/u/demo-restaurant/login |
+| Manager/admin login (phone + PIN/OTP) | https://restro-fxyx.vercel.app/login |
+
+**Test data loaded in the demo database:**
+
+- Demo restaurant — **Demo Restaurant** (`demo-restaurant`, self-ordering enabled)
+- Staff roster (all active, PIN-protected):
+
+  | Employee code | Name | Role |
+  |---|---|---|
+  | EMP001 | Arjun Nair | Waiter |
+  | EMP002 | Priya Menon | Waiter |
+  | E-003 | Arsha | Waiter |
+  | EMP003 | Suresh Kumar | Kitchen |
+  | EMP004 | Divya Rao | Kitchen |
+  | EMP005 | Rohit Sharma | Management |
+  | EMP006 | Meera Nair | Cashier |
+
+- Menu: Butter Chicken (₹280), Masala Dosa (₹120), Veg Biryani (₹180) under the **Mains** category
+
 ## Getting started
 
 ```bash
