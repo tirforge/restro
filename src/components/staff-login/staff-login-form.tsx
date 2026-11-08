@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -112,6 +112,25 @@ export function StaffLoginForm({
     login.execute({ username, employeeCode: selected.employeeCode, pin });
   };
 
+  // Physical keyboard support (POS terminals still get taps, laptops get keys).
+  const formRef = useRef<HTMLFormElement | null>(null);
+  useEffect(() => {
+    if (!selected) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault();
+        appendDigit(event.key);
+      } else if (event.key === "Backspace") {
+        event.preventDefault();
+        backspace();
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        formRef.current?.requestSubmit();
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selected, valid, pin]);
   // Step 1 — pick who you are.
   if (!selected) {
     return (
@@ -174,7 +193,7 @@ export function StaffLoginForm({
 
   // Step 2 — enter the selected staff member's PIN.
   return (
-    <form onSubmit={submit} className="flex w-full max-w-sm flex-col gap-6">
+    <form ref={formRef} onSubmit={submit} className="flex w-full max-w-sm flex-col gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
         <Avatar
           name={selected.name}
