@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
-import QRCode from "qrcode";
+import { upiqrSync } from "upiqr";
 import { LogOutIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -45,7 +45,6 @@ function UpiCollect({
   readonly orderNumber: number;
   readonly amount: number;
 }) {
-  const [qr, setQr] = useState<string | null>(null);
   const fileSlug = `bill-${orderNumber}-${amount.toFixed(0)}`;
   const uri = useMemo(() => {
     try {
@@ -61,12 +60,25 @@ function UpiCollect({
     }
   }, [upiId, restaurantName, amount, orderNumber]);
 
-  useEffect(() => {
-    if (!uri) return;
-    QRCode.toDataURL(uri, { width: 512, margin: 2 })
-      .then(setQr)
-      .catch(() => setQr(null));
-  }, [uri]);
+  const qr = useMemo(() => {
+    if (!uri) return null;
+    try {
+      // NPCI-format dynamic QR via upiqr — amount + order ref locked into the code
+      const { qr, intent } = upiqrSync(
+        {
+          payeeVPA: upiId,
+          payeeName: restaurantName,
+          amount: amount.toFixed(2),
+          transactionRef: `ORD-${orderNumber}`,
+          transactionNote: `Bill #${orderNumber}`,
+        },
+        { width: 512, margin: 2 },
+      );
+      return { qr, intent };
+    } catch {
+      return null;
+    }
+  }, [upiId, restaurantName, amount, orderNumber, uri]);
 
   if (!uri) {
     return (
@@ -80,7 +92,7 @@ function UpiCollect({
     <div className="flex flex-col items-center gap-3">
       {qr ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={qr} alt="UPI payment QR" className="size-48 rounded-xl border" />
+        <img src={qr.qr} alt="UPI payment QR" className="size-48 rounded-xl border" />
       ) : (
         <p className="text-muted-foreground text-sm">Generating QR…</p>
       )}
@@ -95,7 +107,7 @@ function UpiCollect({
       </a>
       {qr ? (
         <a
-          href={qr}
+          href={qr.qr}
           download={`${fileSlug}.png`}
           className="text-sm font-medium underline"
         >
