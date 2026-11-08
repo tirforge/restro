@@ -10,6 +10,7 @@ Built with a strict layered architecture (**UI → Server Actions → Services �
 - **Tailwind CSS v4** · **shadcn/ui** + `@base-ui/react`
 - **Prisma 7** + **PostgreSQL** (`pg` driver adapter)
 - **Zod** validation · **jose** sessions · **Twilio** SMS OTP · **Supabase Storage** (S3) for media
+- **upiqr** — NPCI-spec dynamic UPI QR generation (zero runtime dependencies)
 - **Vitest** for tests · ESLint 9
 
 ## Features
@@ -21,8 +22,9 @@ Built with a strict layered architecture (**UI → Server Actions → Services �
 - **Menu** — categories, items, variants, modifiers, images, "86" availability, per-item recipes.
 - **Inventory** — typed stock movements, bulk receive/count, recipe-based auto-depletion, low-stock alerts.
 - **Billing** — GST (CGST/SGST) handling, round-off, thermal-receipt invoices with a customizable footer.
+- **Dynamic UPI payments** — per-bill NPCI-format QR (`upiqr`) with the exact amount and order reference locked in, plus "Pay with Google Pay" intent links. No gateway fees — funds settle directly to the restaurant's UPI ID.
 - **Dashboard** — live day + month analytics (sales, AOV, payment mix, open orders, daily trend), auto-refresh.
-- **Staff** — role-based staff with PIN login for waiter/kitchen; manager phone-OTP / PIN login.
+- **Staff** — role-based staff with PIN login for waiter/kitchen (screen pad **and** physical keyboard support); manager phone-OTP / PIN login.
 
 ## Live demo
 
@@ -33,13 +35,23 @@ A deployed demo instance is available for testing:
 | What | Where |
 |---|---|
 | App home | https://restro-fxyx.vercel.app/ |
-| Guest self-ordering (table T1) | https://restro-fxyx.vercel.app/order/demo-restaurant |
+| Guest self-ordering (tables T1–T6, pick one) | https://restro-fxyx.vercel.app/order/demo-restaurant |
 | Staff login (waiter/kitchen, PIN) | https://restro-fxyx.vercel.app/u/demo-restaurant/login |
 | Manager/admin login (phone + PIN/OTP) | https://restro-fxyx.vercel.app/login |
 
+> The guest order URL accepts `?table=<id>` (the internal table id, not the label). Without it, the guest picks a free table — the QR sticker printed from `/dashboard/tables` carries the correct one.
+
+### Demo credentials (testing only)
+
+| Who | Login |
+|---|---|
+| **ADMIN** | phone `+917597365803` → PIN `1234` (or OTP code `123456`) |
+| **STAFF** (`/u/demo-restaurant/login` → tap name → PIN pad or keyboard) | Arjun `1111` · Priya `2222` · Suresh `3333` · Divya `4444` |
+| **GUEST** (`/order/demo-restaurant`, no login) | pick table → add items → name → any phone → code `123456` |
+
 **Test data loaded in the demo database:**
 
-- Demo restaurant — **Demo Restaurant** (`demo-restaurant`, self-ordering enabled)
+- Demo restaurant — **Demo Restaurant** (`demo-restaurant`), self-ordering enabled, UPI ID `nivedrk123@okicici`
 - Staff roster (all active, PIN-protected):
 
   | Employee code | Name | Role |
@@ -52,15 +64,10 @@ A deployed demo instance is available for testing:
   | EMP005 | Rohit Sharma | Management |
   | EMP006 | Meera Nair | Cashier |
 
+- Floor: tables **T1–T6** ("Main Hall")
 - Menu: Butter Chicken (₹280), Masala Dosa (₹120), Veg Biryani (₹180) under the **Mains** category
 
-## 🔑 Demo credentials (testing only)
-
-| Who | Login |
-|---|---|
-| **ADMIN** | phone `+917597365803` → PIN `1234` (or OTP code `123456`) |
-| **STAFF** (`/u/demo-restaurant/login` → tap name → PIN pad) | Arjun `1111` · Priya `2222` · Suresh `3333` · Divya `4444` |
-| **GUEST** (`/order/demo-restaurant`, no login) | pick table → add items → name → any phone → code `123456` |
+> ⚠️ These credentials are published for demo purposes and can be used by anyone. Don't run real revenue through this instance.
 
 ## Getting started
 
